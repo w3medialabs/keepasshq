@@ -149,9 +149,10 @@ namespace VaultOrganizer
                 else { var picker = new OpenFileDialog { Filter = "KeePass database|*.kdbx", CheckFileExists = true }; if (picker.ShowDialog(this) == true) location.Text = picker.FileName; }
             }));
             var use = new CheckBox { Content = "Use master password", IsChecked = true, Margin = new Thickness(0, 13, 0, 4) }; body.Children.Add(use);
-            var secret = new PasswordBox(); body.Children.Add(SecretField(secret, "Master password"));
+            var secret = new PasswordBox(); var masterInput=SecretField(secret,"Master password");body.Children.Add(masterInput);
             var confirm = new PasswordBox();
-            if (create) { var caption = Text("CONFIRM PASSWORD", 10, "#7D8A9E"); caption.Margin = new Thickness(0, 12, 0, 5); body.Children.Add(caption); body.Children.Add(SecretField(confirm, "Confirm master password")); }
+            SecretInput confirmInput=null;
+            if (create) { var caption = Text("CONFIRM PASSWORD", 10, "#7D8A9E"); caption.Margin = new Thickness(0, 12, 0, 5); body.Children.Add(caption); confirmInput=SecretField(confirm,"Confirm master password");body.Children.Add(confirmInput); }
             use.Unchecked += (s, e) => { secret.Clear(); confirm.Clear(); secret.IsEnabled = confirm.IsEnabled = false; }; use.Checked += (s, e) => { secret.IsEnabled = confirm.IsEnabled = true; };
             var keyFile = new TextBox { IsReadOnly = true };
             var advanced = new Expander { Header = "Existing key file / Windows account", Margin = new Thickness(0, 12, 0, 0) }; var keys = new StackPanel(); advanced.Content = keys;
@@ -161,7 +162,7 @@ namespace VaultOrganizer
             var hint = Text(create ? "Your new database starts empty. Existing files are never overwritten." : "Each database can use its own master password and key file. Everything stays on this computer.", 12, "#7D8A9E"); hint.TextWrapping = TextWrapping.Wrap; hint.Margin = new Thickness(0, 12, 0, 16); body.Children.Add(hint);
             var row = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
             row.Children.Add(Button("Cancel", CloseModal, "Quiet"));
-            row.Children.Add(Button(create ? "Create & open" : "Open", async () =>
+            var accept=Button(create ? "Create & open" : "Open", async () =>
             {
                 CompositeKey key = null; string path;
                 try
@@ -196,7 +197,9 @@ namespace VaultOrganizer
                     if (closeAfterOpen) { closeAfterOpen = false; var queued = Dispatcher.BeginInvoke(new Action(async () => { await Seal(true); })); }
                     else if (lockAfterOpen) { lockAfterOpen = false; var queued = Dispatcher.BeginInvoke(new Action(async () => { await Seal(false); })); }
                 }
-            }, "Primary"));
+            }, "Primary");row.Children.Add(accept);
+            Action submit=()=>{if(!opening&&!sealing&&veil.Visibility==Visibility.Visible&&accept.IsEnabled)accept.RaiseEvent(new RoutedEventArgs(System.Windows.Controls.Button.ClickEvent));};
+            masterInput.Submitted+=submit;if(confirmInput!=null)confirmInput.Submitted+=submit;
             body.Children.Add(row); Dialog(create ? "Create database" : "Open database", body).Width = 520;
         }
         private async Task OfferPaneDraft(VaultSession working)

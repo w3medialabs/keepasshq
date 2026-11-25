@@ -81,6 +81,9 @@ namespace VaultOrganizer
                 if (pane.Session != SessionFor(entry)) continue;
                 Button button; if (!pane.EntryHeaders.TryGetValue(id, out button)) continue;
                 var grid = button.Content as Grid; if (grid != null) { var name = (TextBlock)grid.Children[1]; name.Text = String.IsNullOrWhiteSpace(value) ? "Untitled" : value; name.ToolTip = value; }
+                string display=String.IsNullOrWhiteSpace(value)?"Untitled":value;
+                UiVisual.Help(button,(pane.Expanded==id?"Collapse entry: ":"Expand entry: ")+display+". Drag this header to move or reorder the card.");
+                System.Windows.Automation.AutomationProperties.SetName(button,"Entry: "+display);
             }
         }
         private Border ReceiveGap(BrowserPane pane, PwGroup parent, string before)
@@ -281,7 +284,7 @@ namespace VaultOrganizer
         }
         private void OnClosing(object sender, CancelEventArgs args)
         {
-            if (allowClose || (session == null && !opening && saveTask == null && draftTask == null)) { StopTimers(); return; }
+            if (allowClose || (session == null && !opening && saveTask == null && draftTask == null)) { ClearText(unlock); CloseModal(); ClearOwnedClipboard(true); StopTimers(); return; }
             args.Cancel = true;
             if (changingDatabase) { lockAfterChange = closeAfterChange = true; FinishReview(MergeChoice.Cancel); return; }
             if (opening) { closeAfterOpen = true; FinishReview(MergeChoice.Cancel); CompleteChoice(0); return; }

@@ -12,6 +12,14 @@ The permanent source repository is [w3medialabs/keepasshq](https://github.com/w3
 
 ## Build and package
 
+For a local portable deployment from a clean, committed checkout:
+
+```powershell
+powershell -NoProfile -File .\package.ps1 -Demo
+```
+
+This archives the selected commit, extracts it into an isolated ignored build directory, runs full build/test/render validation there, and creates `release-output/preview-<commit>/KeePassHQ/KeePassHQ.exe`, a portable ZIP, its matching source ZIP and `SHA256SUMS.txt`. Licenses, corresponding upstream source, build identity and fresh validation summaries accompany the executable. `-Demo` adds a newly generated fictional database (password `demo`) and verifies it by readback; omit it for a package without a database. Existing destinations are preserved; use `-OutputDirectory` with a new ignored or external directory for a repeat package. The script verifies ZIP inventory and executable/demo payload hashes. It does not publish a GitHub Release, create a tag, launch the app or access a real database. See [Build](BUILD.md) for prerequisites.
+
 Build both variants from the candidate source, using the bundled verified dependency without network access. The validator verifies release diagnostics exclusion and embedded dependency integrity. Rebuild from an extracted candidate source archive before publication. Exact byte reproduction is not promised by the legacy compiler's timestamps; successful rebuilding and unchanged version/resource pins are required.
 
 Prepare packages in an ignored output directory. For example, after committing the final reviewed candidate:

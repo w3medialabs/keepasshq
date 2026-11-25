@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
+using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
 
@@ -53,6 +54,7 @@ namespace VaultOrganizer
         internal readonly PasswordBox Masked;
         internal readonly TextBox Revealed;
         internal readonly Button Eye;
+        internal event Action Submitted;
         private bool syncing;
         internal bool IsRevealed { get { return Revealed.Visibility == Visibility.Visible; } }
         internal SecretInput(PasswordBox masked, string label)
@@ -65,12 +67,15 @@ namespace VaultOrganizer
             System.Windows.Automation.AutomationProperties.SetName(Masked, label); System.Windows.Automation.AutomationProperties.SetName(Revealed, label + " (visible)");
             Eye = new Button { Style = (Style)Application.Current.FindResource("Quiet"), Content = UiVisual.Icon("eye"), Focusable = true, Padding = new Thickness(8), MinHeight = 32 };
             Grid.SetColumn(Eye, 1); row.Children.Add(Masked); row.Children.Add(Revealed); row.Children.Add(Eye);
-            Eye.Click += (sender, args) => SetRevealed(!IsRevealed);
+            Eye.Click += (sender, args) => { SetRevealed(!IsRevealed); if (IsRevealed) { Revealed.Focus(); Revealed.CaretIndex=Revealed.Text.Length; } else Masked.Focus(); };
+            Masked.KeyDown += SubmitOnEnter; Revealed.KeyDown += SubmitOnEnter;
             Masked.PasswordChanged += (sender, args) => { if (syncing) return; if (Masked.Password.Length == 0) { SetRevealed(false); return; } syncing = true; try { Revealed.Text = IsRevealed ? Masked.Password : ""; } finally { syncing = false; } };
             Revealed.TextChanged += (sender, args) => { if (syncing || !IsRevealed) return; syncing = true; try { Masked.Password = Revealed.Text; } finally { syncing = false; } };
             Masked.IsEnabledChanged += (sender, args) => { if (!Masked.IsEnabled) SetRevealed(false); Revealed.IsEnabled = Eye.IsEnabled = Masked.IsEnabled; };
             UpdateEye();
         }
+        private void SubmitOnEnter(object sender, KeyEventArgs args)
+        { if(args.Key==Key.Enter&&Submitted!=null) { args.Handled=true;Submitted(); } }
         internal void SetRevealed(bool show)
         {
             show &= Masked.IsEnabled;

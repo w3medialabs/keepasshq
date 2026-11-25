@@ -294,6 +294,9 @@ namespace VaultOrganizer
                 window=new OrganizerWindow();workflow=window.TestPasswordReveal(System.IO.Path.Combine(run,"reveal-ui"),Check);frame=new DispatcherFrame();
                 workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
                 log.Add("PASS explicit password reveal, factor synchronization, hide/close/lock clearing and isolated clipboard boundary");
+                window=new OrganizerWindow();workflow=window.TestUiCompleteness(System.IO.Path.Combine(run,"ui-completeness"),Check);frame=new DispatcherFrame();
+                workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
+                log.Add("PASS revealed-field keyboard submission, empty-session exit cleanup and styled-control behavior");
                 log.Add("PASS "+checks+" assertions; fictional data and an isolated clipboard only");File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 0;
             }
             catch(Exception ex){log.Add("FAIL "+ex.ToString());File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 1;}

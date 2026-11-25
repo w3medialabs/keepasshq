@@ -159,7 +159,6 @@ namespace VaultOrganizer
             unlockButton.Margin = new Thickness(0, 16, 0, 0); unlockButton.HorizontalAlignment = HorizontalAlignment.Stretch;
             unlockContent.Children.Add(unlockButton);
             unlockContent.Children.Add(Button("Create new database…", () => DatabaseDialog(null, true), "Quiet"));
-            password.KeyDown += async (s, e) => { if (e.Key == Key.Enter) { e.Handled = true; await Open(); } };
             EnsureTooltips(shell); SetStatus();
         }
 
@@ -176,7 +175,7 @@ namespace VaultOrganizer
             pathBox.Text = "Choose a .kdbx database"; pathBox.Foreground = Brush("#8B96A6"); stack.Children.Add(FilePickerRow(pathBox, "Choose the KeePass database to open.", Browse));
             usePassword.Checked += (s, e) => { password.IsEnabled = true; };
             usePassword.Unchecked += (s, e) => { password.IsEnabled = false; password.Clear(); };
-            stack.Children.Add(usePassword); stack.Children.Add(SecretField(password, "Master password"));
+            stack.Children.Add(usePassword); var master=SecretField(password,"Master password");master.Submitted+=async()=>{await Open();};stack.Children.Add(master);
             var advanced = new Expander { Header = "Key file / Windows account", Foreground = Brush("#7B8799"), Margin = new Thickness(0, 17, 0, 0) };
             var keys = new StackPanel { Margin = new Thickness(0, 10, 0, 0) }; advanced.Content = keys;
             var keyRow = new Grid(); keyRow.ColumnDefinitions.Add(new ColumnDefinition()); keyRow.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
@@ -314,12 +313,13 @@ namespace VaultOrganizer
         private Button CardHeader(string title, bool group, Action click, bool active)
         {
             var header = Button("", click, "Quiet"); header.Padding = new Thickness(9, 6, 9, 6); header.MinHeight = 30; header.HorizontalContentAlignment = HorizontalAlignment.Stretch;
-            UiVisual.Help(header, (group ? "Open group: " : (active ? "Collapse entry: " : "Expand entry: ")) + title + ". Drag this header to move or reorder the card.");
+            string display=String.IsNullOrWhiteSpace(title)?"Untitled":title;
+            UiVisual.Help(header, (group ? "Open group: " : (active ? "Collapse entry: " : "Expand entry: ")) + display + ". Drag this header to move or reorder the card.");
             var content = new Grid(); content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(22) }); content.ColumnDefinitions.Add(new ColumnDefinition()); content.ColumnDefinitions.Add(new ColumnDefinition { Width = new GridLength(14) });
             var icon = UiVisual.Icon(group ? "folder" : "key", group ? (active ? "#388260" : "#557CB7") : "#8193AE"); content.Children.Add(icon);
             var name = Text(String.IsNullOrWhiteSpace(title) ? "Untitled" : title, 13, group ? (active ? "#245C3A" : "#375F96") : "#344158"); name.TextTrimming = TextTrimming.CharacterEllipsis; name.ToolTip = title; Grid.SetColumn(name, 1); content.Children.Add(name);
             var arrow = Text(group ? "›" : (active ? "−" : "+"), 15, "#8C9AAF"); arrow.HorizontalAlignment = HorizontalAlignment.Right; Grid.SetColumn(arrow, 2); content.Children.Add(arrow); header.Content = content;
-            System.Windows.Automation.AutomationProperties.SetName(header, (group ? "Group: " : "Entry: ") + title);
+            System.Windows.Automation.AutomationProperties.SetName(header, (group ? "Group: " : "Entry: ") + display);
             if (!group) header.Tag = title;
             return header;
         }
@@ -696,9 +696,11 @@ namespace VaultOrganizer
             var body = new StackPanel(); body.Children.Add(Text("ENCRYPTED DRAFT CHECKPOINT (SECONDS)", 10, "#8390A3"));
             var save = new ComboBox { ItemsSource = new[] { 15, 30 }, SelectedItem = saveSeconds, Margin = new Thickness(0, 7, 0, 18) }; body.Children.Add(save);
             UiVisual.Help(save, "How often unpublished edits are protected in a private encrypted checkpoint. This does not save the shared database.");
+            var saveOptions=new Style(typeof(ComboBoxItem),(Style)Application.Current.FindResource(typeof(ComboBoxItem)));saveOptions.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding("Content"){RelativeSource=new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.Self),StringFormat="Protect unpublished edits every {0} seconds."}));save.ItemContainerStyle=saveOptions;
             body.Children.Add(Text("LOCK AFTER INACTIVITY (MINUTES)", 10, "#8390A3"));
             var idle = new ComboBox { ItemsSource = new[] { 1, 2, 5, 10, 15 }, SelectedItem = lockMinutes, Margin = new Thickness(0, 7, 0, 21) }; body.Children.Add(idle);
             UiVisual.Help(idle, "Minutes without activity before databases are safely locked and released.");
+            var idleOptions=new Style(typeof(ComboBoxItem),(Style)Application.Current.FindResource(typeof(ComboBoxItem)));idleOptions.Setters.Add(new Setter(FrameworkElement.ToolTipProperty,new System.Windows.Data.Binding("Content"){RelativeSource=new System.Windows.Data.RelativeSource(System.Windows.Data.RelativeSourceMode.Self),StringFormat="Lock after {0} minutes without activity."}));idle.ItemContainerStyle=idleOptions;
             var done = Button("Done", () => { saveSeconds = (int)save.SelectedItem; lockMinutes = (int)idle.SelectedItem; WriteSettings(); CloseModal(); Activity(); SetStatus(); }, "Primary"); body.Children.Add(done); Dialog("Settings", body);
         }
         private void ReadSettings()

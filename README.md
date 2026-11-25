@@ -44,6 +44,7 @@ Use a disposable copy first. Passwords are deliberately visible while entries ar
 | [Security policy](SECURITY.md) | Threat boundaries and private reporting |
 | [Development audit](docs/AUDIT.md) | Findings, corrections, tests and remaining limits |
 | [Adversarial follow-up](docs/ADVERSARIAL-AUDIT.md) | Reproduced edge cases, fixes and regression evidence |
+| [UI completeness follow-up](docs/UI-COMPLETENESS.md) | Keyboard/reveal cleanup, styled-control behavior and local deployment |
 | [Architecture](docs/ARCHITECTURE.md) | Sessions, storage, merge and transfer protocol |
 | [Design choices](docs/THEORY.md) | Browser model, private edits, preservation and narrow runtime |
 | [Contributing](CONTRIBUTING.md) | Small changes, synthetic fixtures and review expectations |
@@ -60,6 +61,6 @@ cd keepasshq
 powershell -NoProfile -File .\validate.ps1 -Render
 ```
 
-Builds use the bundled, hash-pinned KeePass 2.62 dependency without package restore. Validation checks source inventory, documentation links and provenance, builds release and diagnostics, checks the release boundary and embedded dependency, runs the synthetic suite, and renders fourteen fictional previews. See [Contributing](CONTRIBUTING.md) before opening a [pull request](https://github.com/w3medialabs/keepasshq/pulls).
+Builds use the bundled, hash-pinned KeePass 2.62 dependency without package restore. Validation checks source inventory, documentation links and provenance, builds release and diagnostics, checks the release boundary and embedded dependency, runs the synthetic suite, and renders fifteen fictional previews. To create a local portable deployment with a fictional demo, run `powershell -NoProfile -File .\package.ps1 -Demo` from a clean committed checkout; see [release instructions](docs/RELEASING.md). See [Contributing](CONTRIBUTING.md) before opening a [pull request](https://github.com/w3medialabs/keepasshq/pulls).
 
 This is an independent application using KeePass technology, not an official KeePass release. The house-lock mark is from [Bootstrap Icons](https://icons.getbootstrap.com/icons/house-lock/), used under MIT. KeePassHQ and its combined distribution are GPL-2.0-or-later; see [LICENSE](LICENSE).

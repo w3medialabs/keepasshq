@@ -1,3 +1,24 @@
+UI completeness follow-up — November 25, 2026
+Starting commit: ffe0309b10a0609af23db269db5989432c00c25b
+
+PASS release/diagnostics builds and 350 synthetic assertions (12 additions).
+PASS masked/revealed Enter handling, modal confirmation validation, and creation.
+PASS empty-session exit clears main/modal factors and owned test clipboard text,
+     while preserving another application's fictional replacement.
+PASS actual scrollbar thumb/page routing, narrow dimensions, popup item generation,
+     dropdown selection and option help. Actual popup-template preview inspected.
+PASS fifteen synthetic renders and release diagnostics exclusion, including the
+     synthetic input source and completeness workflow.
+PASS extracted-source validation includes nested files beneath ignored parents;
+     a deliberate broken-link regression fails, then the restored archive passes.
+PASS source inventory, links, secret/personal-path patterns, branding and upstream
+     source integrity. See UI-COMPLETENESS.md for resolved gaps and limits.
+PASS release diagnostics exclusion and embedded dependency integrity
+Release SHA-256: C8C132C01CF04DC5563249756BB74041BB888EE28C091A26EAC904A7C63E69BE
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Initial UI refresh record (historical) ---
+
 UI refresh validation — November 25, 2026
 
 PASS release and diagnostics builds without compiler warnings.

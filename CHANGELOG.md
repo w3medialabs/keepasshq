@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+- UI completeness follow-up: restore Enter submission and editor focus for revealed passwords, clear empty-session factors/app-owned clipboard on exit, add option help, and keep entry help/accessibility labels current after renaming.
+- Verify custom scrollbar thumb/page routing and real dropdown option selection; expand synthetic validation to 350 assertions and fifteen rendered previews, including the actual dropdown popup template.
+- Add `package.ps1` for a repeatable local portable deployment built from an isolated commit archive, with optional verified fictional demo, corresponding source, licenses, validation summaries and payload/checksum verification.
+- Correct extracted-source inventory filtering so an ignored parent directory cannot hide nested source/documentation files from validation.
 - Refreshed the WPF interface: normal centered startup, centered view switch, icon-only toolbar, far-right Settings, styled tooltips/menus/dropdowns, blue notifications and labeled file pickers.
 - Added explicit password reveal to open/create inputs, with synchronization and clearing on hide, disable, close, lock and decryption; expanded synthetic validation to 338 assertions.
 - Made browsers more compact with white bordered panels/columns, folder/key icons, centered captions, narrow scrollbars and full database paths beneath record counts.

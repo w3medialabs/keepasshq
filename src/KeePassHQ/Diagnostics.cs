@@ -134,7 +134,7 @@ namespace VaultOrganizer
                 saveStatus.Text="Unsaved changes · encrypted draft protected · Ctrl+S to publish";
                 if(mode=="generator")ShowGenerator(FieldBox(panes[0],imports.Entries.First(),PwDefs.PasswordField));
                 if(mode=="recovery") { var decision = AskPreviousCheckpoint(); }
-                if(mode=="settings")ShowSettings();
+                if(mode=="settings"||mode=="dropdown")ShowSettings();
                 if(mode=="open")DatabaseDialog(panes[1],false);
                 if(mode=="toast")Toast("Changes saved. Both databases are up to date.",false);
                 if(mode=="reminder") { dirtyTicks=Stopwatch.GetTimestamp()-240*Stopwatch.Frequency;lastNudgeTicks=lastStrongTicks=0;NudgeSave();SetStatus(); }
@@ -150,6 +150,14 @@ namespace VaultOrganizer
             if(mode=="create")DatabaseDialog(null,true);
             var content=(FrameworkElement)Content;content.Width=width;content.Height=height;content.Measure(new Size(width,height));content.Arrange(new Rect(0,0,width,height));content.UpdateLayout();
             var bitmap=new RenderTargetBitmap(width,height,96,96,PixelFormats.Pbgra32);bitmap.Render(content);
+            if(mode=="dropdown")
+            {
+                var combo=Descendants<ComboBox>(veil).First();combo.ApplyTemplate();var popup=(System.Windows.Controls.Primitives.Popup)combo.Template.FindName("PART_Popup",combo);
+                var options=(FrameworkElement)popup.Child;options.Measure(new Size(combo.ActualWidth,Double.PositiveInfinity));options.Arrange(new Rect(new Point(),options.DesiredSize));options.UpdateLayout();
+                int optionWidth=(int)Math.Ceiling(options.ActualWidth),optionHeight=(int)Math.Ceiling(options.ActualHeight);
+                var optionBitmap=new RenderTargetBitmap(optionWidth,optionHeight,96,96,PixelFormats.Pbgra32);optionBitmap.Render(options);
+                Point at=combo.TranslatePoint(new Point(0,combo.ActualHeight),content);var overlay=new DrawingVisual();using(var drawing=overlay.RenderOpen())drawing.DrawImage(optionBitmap,new Rect(at.X,at.Y,optionWidth,optionHeight));bitmap.Render(overlay);
+            }
             if(mode=="tooltip")
             {
                 var previewTip=new ToolTip { Content="Save · publish pending edits in all loaded databases · Ctrl+S",Style=(Style)Application.Current.FindResource(typeof(ToolTip)),Visibility=Visibility.Visible };

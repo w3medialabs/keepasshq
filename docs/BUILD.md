@@ -28,7 +28,7 @@ Recommended complete check, from any working directory:
 powershell -NoProfile -File .\validate.ps1 -Render
 ```
 
-Use the full path to `validate.ps1` when outside the checkout. The script checks source inventory, secret/personal-path patterns, Markdown links, corresponding upstream source hash and branding assets; builds both variants; verifies release diagnostics exclusion and the embedded dependency hash; runs the suite; and optionally renders all fourteen previews. Omit `-Render` for the same checks without previews. Summaries and generated fictional data stay under ignored `test-output/`; build output stays under `bin/` and `bin-diagnostics/`.
+Use the full path to `validate.ps1` when outside the checkout. The script checks source inventory, secret/personal-path patterns, Markdown links, corresponding upstream source hash and branding assets; builds both variants; verifies release diagnostics exclusion and the embedded dependency hash; runs the suite; and optionally renders all fifteen previews. Omit `-Render` for the same checks without previews. Summaries and generated fictional data stay under ignored `test-output/`; build output stays under `bin/` and `bin-diagnostics/`.
 
 Run `powershell -NoProfile -File .\scripts\check-source.ps1` for source checks alone. Git checkouts inspect tracked and unignored files; extracted archives inspect the documented source directories. Pattern checks support manual review and do not establish that arbitrary content is free of secrets.
 
@@ -45,7 +45,7 @@ if ($process.ExitCode -ne 0) { throw 'Synthetic checks failed' }
 
 GUI executables need `Start-Process -Wait` when scripting completion. Tests create fictional databases, synthetic key files and isolated draft roots under the chosen output directory. Clipboard calls are replaced by an in-memory fake. They do not open your real vault, use your account-protection file, interact with your clipboard, or drive another password manager's UI. Do not pass a real vault path to diagnostics.
 
-The original 1.2 package passed 306 assertions; the adversarial follow-up passed 329, and the current UI refresh passes 338. Diagnostics require an explicitly isolated default draft root, including UI-created databases. Test output contains fictional plaintext and diagnostic exception details; keep it out of Git. See [ADVERSARIAL-AUDIT.md](ADVERSARIAL-AUDIT.md) for the new regressions and [AUDIT.md](AUDIT.md) for the original scope and limits.
+The original 1.2 package passed 306 assertions; the adversarial follow-up passed 329, and the UI refresh passed 338, and its completeness follow-up passes 350. Diagnostics require an explicitly isolated default draft root, including UI-created databases. Test output contains fictional plaintext and diagnostic exception details; keep it out of Git. See [ADVERSARIAL-AUDIT.md](ADVERSARIAL-AUDIT.md) for the new regressions and [AUDIT.md](AUDIT.md) for the original scope and limits.
 
 ## Render synthetic previews
 
@@ -54,7 +54,7 @@ $image = Join-Path $results 'organizer.png'
 Start-Process -FilePath $exe -ArgumentList @('--render-demo', ('"' + $image + '"'), 'organizer') -WindowStyle Hidden -Wait
 ```
 
-Modes: `viewer`, `organizer`, `generator`, `gap`, `unlock`, `create`, `dual`, `recovery`, `reminder`, `open`, `settings`, `toast`, `compact`, `tooltip`. These use in-process WPF rendering with fictional fixtures, without opening a real password-manager window. PNGs are 1280×820, with a 980×640 compact-layout preview. No screenshot of an unlocked real vault is necessary.
+Modes: `viewer`, `organizer`, `generator`, `gap`, `unlock`, `create`, `dual`, `recovery`, `reminder`, `open`, `settings`, `toast`, `compact`, `tooltip`, `dropdown`. These use in-process WPF rendering with fictional fixtures, without opening a real password-manager window. PNGs are 1280×820, with a 980×640 compact-layout preview. No screenshot of an unlocked real vault is necessary.
 
 ## Layout
 

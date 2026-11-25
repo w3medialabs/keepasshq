@@ -10,7 +10,7 @@ $files = if ((Test-Path -LiteralPath (Join-Path $root '.git')) -and (Get-Command
         $path = Join-Path $root $directory
         if (Test-Path -LiteralPath $path) {
             Get-ChildItem -LiteralPath $path -Recurse -Force -File | Where-Object {
-                $_.FullName -notmatch '[\\/](bin|bin-diagnostics|test-output|release-output|render-[^\\/]+|synthetic-[^\\/]+)[\\/]'
+                $_.FullName.Substring($root.Length + 1) -notmatch '(^|[\\/])(bin|bin-diagnostics|test-output|release-output|render-[^\\/]+|synthetic-[^\\/]+)[\\/]'
             } | ForEach-Object { $_.FullName.Substring($root.Length + 1) }
         }
     }

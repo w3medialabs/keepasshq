@@ -8,7 +8,7 @@ Obtain the portable archive from [GitHub Releases](https://github.com/w3medialab
 
 Portable packages may include a fictional Demo.kdbx with password `demo`. The source checkout contains no database files; diagnostics generate disposable fictional fixtures locally.
 
-On the open screen and open/create dialogs, use the eye button inside a master-password input to show or hide it. Showing is explicit; hiding removes the temporary visible copy. Disabling the password factor, closing its dialog, locking, or completing decryption clears/hides both representations. Reveal does not copy anything to the clipboard. Entry password fields remain visible by design.
+On the open screen and open/create dialogs, use the eye button inside a master-password input to show or hide it. Showing is explicit; hiding removes the temporary visible copy. Enter submits either representation, including the creation confirmation. Disabling the password factor, closing its dialog, locking, closing the application or completing decryption clears/hides both representations. Reveal does not copy anything to the clipboard. If you explicitly copy a revealed factor, app-owned clipboard cleanup also runs on exit; another application's replacement is retained. Entry password fields remain visible by design.
 
 ## Organize one database
 
