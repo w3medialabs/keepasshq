@@ -1,5 +1,7 @@
 # Adversarial completeness audit
 
+This is the earlier follow-up record. See [FINAL-AUDIT.md](FINAL-AUDIT.md) for the latest source review against KeePass and Microsoft guidance and additional reproduced fixes.
+
 Reviewed November 25, 2026 on the development workstation, starting at source commit `37edbe9540f58aceebd6beb7d741b4291828e078`. Scope: all application source, synthetic tests, build/validation scripts, workflow, public documentation, templates, dependency provenance and release boundaries. This is a development review, not independent security certification or a parser fuzzing campaign. No real databases, actual key factors, account-protection files, user clipboard or unlocked password-manager UI were accessed.
 
 ## Findings and resolutions

@@ -6,6 +6,8 @@ Obtain the portable archive from [GitHub Releases](https://github.com/w3medialab
 
 **Create new database** opens a filename/key dialog. Enter and confirm a nonempty password, or choose supported nonpassword factors. The app can use an existing key file; it does not generate one. Store all required factors independently. Choose an unused `.kdbx` filename. A newly created database is empty; add your own groups and entries.
 
+Keep a key file separate from the database; obtaining both removes its possession-factor benefit. Back up required factors securely. Windows account protection depends on that account's intact protected material and is not made portable by copying the executable or recreating the same login name. See [KeePass master-key guidance](https://keepass.info/help/base/keys.html).
+
 Portable packages may include a fictional Demo.kdbx with password `demo`. The source checkout contains no database files; diagnostics generate disposable fictional fixtures locally.
 
 On the open screen and open/create dialogs, use the eye button inside a master-password input to show or hide it. Showing is explicit; hiding removes the temporary visible copy. Enter submits either representation, including the creation confirmation. Disabling the password factor, closing its dialog, locking, closing the application or completing decryption clears/hides both representations. Reveal does not copy anything to the clipboard. If you explicitly copy a revealed factor, app-owned clipboard cleanup also runs on exit; another application's replacement is retained. Entry password fields remain visible by design.
@@ -40,6 +42,8 @@ Cross-file transfers clear local undo. They are not an atomic transaction across
 
 Save publishes every loaded database sequentially. Each session first checks the bytes last loaded/saved. Compatible external changes are brought in using the common baseline; conflicting edits require **Use app edits**, **Use file edits**, or **Keep both entries**, when applicable. Keep both preserves full entries with a fresh UUID for the file copy. Changed/unknown key factors or a different root identity block automatic merging.
 
+When both versions changed credentials, username, password and URL are selected together. For example, an app-side username edit and a file-side password edit require review; the app does not silently combine them. Use app/file selects that whole credential bundle, while independent notes/custom fields are still kept. Keep both retains both actual credential versions. See the [fictional conflict preview](images/conflict.png).
+
 The app holds a local `.organizer-lock` sidecar gate while a file is open and a short standard KeePass file lock while replacing it. This gate coordinates KeePassHQ windows on this machine, not every application or remote device. SHA-256 checks and post-replacement preimage checks preserve late competing writers. No app can detect OneDrive edits that have not reached the local file. Let sync finish before opening and after saving; use a local materialized file rather than an unavailable online-only placeholder.
 
 Beside each database is a `<database>.versions` directory. It contains a byte-preserving first-session backup and a rolling `previous.kdbx`, plus uniquely named concurrent versions when needed. Replacement first captures the prior file as a unique `preimage-*.kdbx`; if verification cannot finish or the app crashes, that file remains independently preserved. Further saves in a session with an unverified competing version are blocked. Keep all encrypted versions private, save a recovery copy of your working edits, and review the retained versions before continuing. Backups are retained; the app does not prune them automatically. Encrypted temporary files may remain after a hard crash; do not delete anything until your saved database and recovery copies are verified.
@@ -51,6 +55,8 @@ Every 15/30 seconds when edits exist, a private encrypted bundle protects workin
 For compatibility with Vault Organizer 1.1, drafts remain under `%LOCALAPPDATA%\VaultOrganizer\Drafts` with `.vdo-draft` names and authenticated role/nonce metadata. KeePassHQ retains these legacy names deliberately. Settings are in `KeePassHQ.settings` beside the executable; if that folder is unwritable, choices apply only for the session. Drafts are tied to the database's original absolute path and key factors. Moving/renaming the database will not automatically find drafts under its old path hash. Keep the original path available for recovery.
 
 On unlock, an existing draft must be resumed/reconciled, explicitly discarded, or kept by canceling opening. Separate session branches are retained independently; resuming the most recent branch does not silently erase older ones. Inspect older recovery branches before deleting them.
+
+New checkpoints authenticate the complete list of encrypted components. An older-format checkpoint asks for a separate compatibility review because it cannot prove that optional pending-review files were not removed. Resume only a trusted local copy, inspect its records, and keep original backups; the next checkpoint uses the stronger format. Retained complete older checkpoints are not proof of freshness.
 
 A previous checkpoint is discoverable if its primary draft is missing. If the latest draft is damaged or unreadable and a previous checkpoint exists, choose **Cancel opening**, **Retry latest**, or **Resume previous**. Previous checkpoints can omit newer edits; review the recovered data before saving. The damaged primary is retained separately even after the older work is saved, so a later opening may still offer that retained branch. Discard it only after confirming recovery is complete.
 
@@ -66,7 +72,7 @@ If the final checkpoint fails, the app states **Lock incomplete**. The file gate
 
 Use the key action beside a password field. Choose 8–128 characters and desired upper/lower/digit/symbol categories. Changes regenerate the result. Cancel leaves the field unchanged; Copy copies and closes for use elsewhere; Use fills the calling field without touching the clipboard.
 
-Passwords remain visible while expanded. App-owned clipboard text is cleared after about 30 seconds or on lock if it still matches; another application's replacement is left alone. Windows clipboard history/cloud sync may retain its own copy.
+Passwords remain visible while expanded. Explicit buttons and keyboard/context copies, including generator and conflict text, request exclusion from Windows clipboard history/cloud sync and share matching-content cleanup after about 30 seconds or on lock. Cleanup preserves different replacement text and retries while busy. Other software can ignore exclusion formats; identical replacement text and a change between the clipboard read and clear cannot be distinguished reliably. Existing history/cloud copies are not erased.
 
 ## Troubleshooting
 
@@ -76,3 +82,4 @@ Passwords remain visible while expanded. App-owned clipboard text is cleared aft
 - **Unknown external key/root:** automatic merge stops. Keep encrypted copies of both versions for reconciliation in their respective clients.
 - **Large/expensive vault:** encryption cost is the database's KDF settings. Checkpoints avoid repeating an unchanged baseline's KDF, but must still encrypt and verify the current working database.
 - **Unsigned executable:** this community build is not Authenticode-signed. Obtain it from a trusted release or build the supplied source; an unsigned wrapper is not authenticated by the signature on its embedded dependency.
+- **Embedded dependency required:** keep KeePassHQ in its own trusted portable folder. Remove or relocate a neighboring KeePass.exe/KeePass.dll to its own folder; startup refuses it rather than using a different dependency.

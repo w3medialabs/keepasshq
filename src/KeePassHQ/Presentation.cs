@@ -111,7 +111,6 @@ namespace VaultOrganizer
         private SecretInput SecretField(PasswordBox masked, string label)
         {
             var field = new SecretInput(masked, label);
-            DataObject.AddCopyingHandler(field.Revealed, (sender, args) => { if (args.DataObject.GetDataPresent(DataFormats.UnicodeText)) OwnClipboard(args.DataObject.GetData(DataFormats.UnicodeText) as string); });
             return field;
         }
         private static string ButtonHelp(string label)

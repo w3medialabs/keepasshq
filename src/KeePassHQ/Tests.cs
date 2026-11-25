@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using System.Windows.Threading;
 using KeePassLib;
 using KeePassLib.Keys;
@@ -151,10 +152,10 @@ namespace VaultOrganizer
                 {
                     var rich = Rich(s.Database); string id = rich.Uuid.ToHexString(); s.Set(rich, PwDefs.PasswordField, "app-password"); s.Set(rich, PwDefs.UrlField, "https://local.example.test");
                     WriteOutside(path, db => { ExternalSet(Rich(db), PwDefs.PasswordField, "file-password"); ExternalSet(Rich(db), PwDefs.NotesField, "Independent file note"); });
-                    using (var plan = s.PrepareMergeAsync().GetAwaiter().GetResult()) { Check(plan.Conflicts.Count == 1 && plan.Conflicts[0].Fields.Single() == PwDefs.PasswordField, "Only competing password requires review"); plan.Conflicts[0].Choice = choice; s.ApplyMerge(plan); }
+                    using (var plan = s.PrepareMergeAsync().GetAwaiter().GetResult()) { Check(plan.Conflicts.Count == 1 && plan.Conflicts[0].Credentials && plan.Conflicts[0].Fields.Count == 3, "Competing credentials require review as one username/password/URL bundle"); plan.Conflicts[0].Choice = choice; s.ApplyMerge(plan); }
                     rich = s.Database.RootGroup.GetEntries(true).First(e => e.Uuid.ToHexString() == id);
                     Check(VaultSession.Read(rich, PwDefs.PasswordField) == (choice == MergeChoice.File ? "file-password" : "app-password"), "Conflict choice honored");
-                    Check(VaultSession.Read(rich, PwDefs.NotesField) == "Independent file note" && VaultSession.Read(rich, PwDefs.UrlField) == "https://local.example.test", "Conflict resolution preserves independent fields");
+                    Check(VaultSession.Read(rich, PwDefs.NotesField) == "Independent file note" && VaultSession.Read(rich, PwDefs.UrlField) == (choice == MergeChoice.File ? "https://mail.example.test" : "https://local.example.test"), "Conflict resolution preserves independent notes and selects the matching credential URL");
                     if (choice == MergeChoice.Both) { var copy = s.Database.RootGroup.GetEntries(true).Single(e => VaultSession.Read(e,PwDefs.TitleField).EndsWith("(file copy)")); Check(copy.Uuid.ToHexString() != id && copy.Binaries.Get("sample.txt") != null && VaultSession.Read(copy,PwDefs.PasswordField) == "file-password", "Keep-both retains complete file entry with a fresh identity"); }
                     Save(s);
                 }
@@ -201,8 +202,8 @@ namespace VaultOrganizer
                 WriteOutside(path,db=>ExternalSet(Rich(db),PwDefs.UserNameField,"outside-after-lock@example.test"));
                 using(var s=OpenTest(path,directory))
                 {
-                    using(var plan=s.ResumeDraftAsync().GetAwaiter().GetResult()){Check(plan.Conflicts.Count==0,"Draft baseline reconciles changes made while closed");s.ApplyMerge(plan);}
-                    var e=s.Database.RootGroup.GetEntries(true).First(x=>x.Uuid.ToHexString()==id);Check(VaultSession.Read(e,PwDefs.NotesField)=="private-draft-only-marker-9528" && VaultSession.Read(e,PwDefs.UserNameField)=="outside-after-lock@example.test","Recovered draft preserves both unpublished and remote work");
+                    using(var plan=s.ResumeDraftAsync().GetAwaiter().GetResult()){Check(plan.Conflicts.Count==1&&plan.Conflicts[0].Credentials,"Draft recovery reviews concurrent username/password changes as one bundle");plan.Conflicts[0].Choice=MergeChoice.Both;s.ApplyMerge(plan);}
+                    var e=s.Database.RootGroup.GetEntries(true).First(x=>x.Uuid.ToHexString()==id);Check(VaultSession.Read(e,PwDefs.NotesField)=="private-draft-only-marker-9528" && VaultSession.Read(e,PwDefs.UserNameField)=="alex@example.test" && VaultSession.Read(e,PwDefs.PasswordField)=="new-draft-password" && s.Database.RootGroup.GetEntries(true).Any(copy=>copy.Uuid.ToHexString()!=id && VaultSession.Read(copy,PwDefs.UserNameField)=="outside-after-lock@example.test" && VaultSession.Read(copy,PwDefs.PasswordField)=="fictional-original-123"),"Recovered draft preserves both original credential combinations after Keep both review");
                     Save(s);s.RemoveDraft();Check(!s.DraftExists,"Committed draft can be removed");
                 }
             }
@@ -268,6 +269,21 @@ namespace VaultOrganizer
                 Check(VaultSession.Read(Rich(s.Database),PwDefs.UserNameField)=="last-instant-writer@example.test"&&VaultSession.Read(Rich(s.Database),PwDefs.NotesField)=="Must remain unpublished","Late writer and local edits both survive reconciliation");
             }
         }
+        private static void RunUiWorkflow(Task workflow, string name)
+        {
+            var frame = new DispatcherFrame(); var dispatcher = Dispatcher.CurrentDispatcher;
+            var timeout = new DispatcherTimer { Interval = TimeSpan.FromSeconds(60) };
+            timeout.Tick += (sender, args) => frame.Continue = false;
+            workflow.ContinueWith(task => dispatcher.BeginInvoke(new Action(() => frame.Continue = false)));
+            timeout.Start();
+            try
+            {
+                if (!workflow.IsCompleted) Dispatcher.PushFrame(frame);
+                if (!workflow.IsCompleted) throw new TimeoutException("Synthetic UI workflow timed out: " + name);
+                workflow.GetAwaiter().GetResult();
+            }
+            finally { timeout.Stop(); }
+        }
         public static int Run(string baseDirectory)
         {
             Directory.CreateDirectory(baseDirectory);string run=System.IO.Path.Combine(baseDirectory,"synthetic-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(run);var log=new List<string>();
@@ -275,28 +291,26 @@ namespace VaultOrganizer
             try
             {
                 Check(String.IsNullOrEmpty(typeof(PwDatabase).Assembly.Location),"Library loaded from embedded resource");
-                Check(typeof(PwDatabase).Assembly.GetName().Version>=new Version(2,60,0,0),"Library includes upstream account-key safety fix");
+                Check(typeof(PwDatabase).Assembly.GetName().Version==new Version(2,62,0,0),"Library matches the pinned KeePass 2.62 version");
                 ModelChecks(run);log.Add("PASS read-only opening, moves, mixed reordering, encryption, preservation, backups, concurrent edits, and gate release");
                 MergeChecks(run);log.Add("PASS three-way merge, competing field choices, deletion review, and order retention");
                 DraftChecks(run);log.Add("PASS authenticated draft checkpoints, no shared-file publication, restart recovery, and external changes");
                 SecurityChecks(run);log.Add("PASS CSPRNG rules/bounds, structure validation, recovery destination races, and damaged-write rejection");
                 AuditChecks(run);log.Add("PASS previous-checkpoint discovery, explicit fallback, damaged-draft preservation, and unreadable-preimage retention across sessions");
+                FinalAuditChecks(run);log.Add("PASS credential-bundle choices, stale save/checkpoint rejection, protected whitespace, component completeness and legacy compatibility");
                 var window=new OrganizerWindow();System.Threading.SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
-                var uiDir=System.IO.Path.Combine(run,"ui");Directory.CreateDirectory(uiDir);var workflow=window.TestWorkflow(uiDir,Check);var frame=new DispatcherFrame();var dispatcher=Dispatcher.CurrentDispatcher;
-                workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
+                var uiDir=System.IO.Path.Combine(run,"ui");Directory.CreateDirectory(uiDir);RunUiWorkflow(window.TestWorkflow(uiDir,Check),"editing and lifecycle");
                 log.Add("PASS matching browsers, mirrored edits, mode switching, generator actions, animated gap wiring, reminders, timeout, closing, and failed-checkpoint choices");
-                window=new OrganizerWindow();workflow=window.TestMultipleDatabases(System.IO.Path.Combine(run,"multi"),Check);frame=new DispatcherFrame();
-                workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
+                window=new OrganizerWindow();RunUiWorkflow(window.TestMultipleDatabases(System.IO.Path.Combine(run,"multi"),Check),"multiple databases");
                 log.Add("PASS database creation, no-overwrite races, dual-session isolation, independent drafts, destination-first transfers, metadata preservation, and failed-transfer source retention");
-                window=new OrganizerWindow();workflow=window.TestAuditWorkflow(System.IO.Path.Combine(run,"audit-ui"),Check);frame=new DispatcherFrame();
-                workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
+                window=new OrganizerWindow();RunUiWorkflow(window.TestAuditWorkflow(System.IO.Path.Combine(run,"audit-ui"),Check),"audit lifecycle");
                 log.Add("PASS empty-session locking clears dialog secrets and save reminders reflect checkpoint state");
-                window=new OrganizerWindow();workflow=window.TestPasswordReveal(System.IO.Path.Combine(run,"reveal-ui"),Check);frame=new DispatcherFrame();
-                workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
+                window=new OrganizerWindow();RunUiWorkflow(window.TestPasswordReveal(System.IO.Path.Combine(run,"reveal-ui"),Check),"password reveal");
                 log.Add("PASS explicit password reveal, factor synchronization, hide/close/lock clearing and isolated clipboard boundary");
-                window=new OrganizerWindow();workflow=window.TestUiCompleteness(System.IO.Path.Combine(run,"ui-completeness"),Check);frame=new DispatcherFrame();
-                workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
+                window=new OrganizerWindow();RunUiWorkflow(window.TestUiCompleteness(System.IO.Path.Combine(run,"ui-completeness"),Check),"styled controls and keyboard");
                 log.Add("PASS revealed-field keyboard submission, empty-session exit cleanup and styled-control behavior");
+                window=new OrganizerWindow();RunUiWorkflow(window.TestFinalAuditWorkflow(System.IO.Path.Combine(run,"final-audit-ui"),Check),"final adversarial review");
+                log.Add("PASS generator copy ownership, clipboard exclusion formats and unreadable transfer-source blocking");
                 log.Add("PASS "+checks+" assertions; fictional data and an isolated clipboard only");File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 0;
             }
             catch(Exception ex){log.Add("FAIL "+ex.ToString());File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 1;}

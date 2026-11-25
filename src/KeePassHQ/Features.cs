@@ -160,6 +160,17 @@ namespace VaultOrganizer
         private void CloseModal()
         { ClearText(veil); veil.Children.Clear(); veil.Visibility = Visibility.Collapsed; UpdateInteraction(); }
         private static byte[] ClipboardDigest(string text) { using (var hash = SHA256.Create()) return hash.ComputeHash(Encoding.UTF8.GetBytes(text ?? "")); }
+        private void TrackTextCopy(object sender, DataObjectCopyingEventArgs args)
+        {
+            if (args.IsDragDrop || !args.DataObject.GetDataPresent(DataFormats.UnicodeText)) return;
+            try
+            {
+                string text = args.DataObject.GetData(DataFormats.UnicodeText) as string;
+                if (String.IsNullOrEmpty(text)) return;
+                ClipboardPayload.Protect(args.DataObject); OwnClipboard(text);
+            }
+            catch { args.CancelCommand(); Toast("The clipboard copy could not be protected. Try again.", true); }
+        }
         private void OwnClipboard(string text) { if (String.IsNullOrEmpty(text)) return; clipboardHash = ClipboardDigest(text); clipboardAtTicks = Stopwatch.GetTimestamp(); }
         private void ExpireClipboard()
         {
@@ -233,9 +244,18 @@ namespace VaultOrganizer
             bool previous = false;
             while (true)
             {
-                try { return await working.ResumeDraftAsync(previous); }
+                MergePlan plan = null;
+                try
+                {
+                    plan = await working.ResumeDraftAsync(previous);
+                    if (!plan.LegacyRecovery) return plan;
+                    int legacyChoice = await Ask("Review older draft format", "This older draft authenticates its encrypted contents, but cannot prove that optional pending-review files were not removed. Resume only a trusted local checkpoint, then review its entries before saving. Its next checkpoint uses the stronger format.", "Cancel opening", "Keep draft", "Resume and review");
+                    if (legacyChoice == 2) return plan;
+                    plan.Dispose(); return null;
+                }
                 catch
                 {
+                    if (plan != null) plan.Dispose();
                     if (previous || !working.HasPreviousCheckpoint) throw;
                 }
                 int choice = await AskPreviousCheckpoint();

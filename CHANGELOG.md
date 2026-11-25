@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Final adversarial review against KeePass/Microsoft guidance: require whole username/password/URL bundle review for concurrent credential edits; preserve independent notes and Keep-both versions.
+- Compare intended content against encrypted save/create/recovery/checkpoint readback, including history, protected fields, cipher/KDF, custom data/icons and tombstones; reject valid-but-stale candidates.
+- Authenticate new draft component inventories, reject missing/ambiguous components, and require explicit compatibility review for older drafts while preserving legacy paths and identifiers.
+- Cover generator/conflict/normal text copies with clipboard cleanup and Windows history/cloud exclusion formats. Block publication after an unreadable changed-key source version interrupts a transfer.
+- Refuse neighboring KeePass assemblies at startup; add negative EXE/DLL shadow checks, bounded synthetic UI waits, 385 assertions and a sixteenth credential-conflict preview. Enable and verify GitHub private vulnerability reporting.
 - Keep browser columns at a steady width when entries expand; shrink and tighten input actions. Replace hand-drawn control/card symbols with locally embedded Bootstrap Icons 1.13.1 SVGs, preserving original geometry, source and MIT attribution.
 - UI completeness follow-up: restore Enter submission and editor focus for revealed passwords, clear empty-session factors/app-owned clipboard on exit, add option help, and keep entry help/accessibility labels current after renaming.
 - Verify custom scrollbar thumb/page routing and real dropdown option selection; expand synthetic validation to 350 assertions and fifteen rendered previews, including the actual dropdown popup template.

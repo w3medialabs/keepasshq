@@ -1,3 +1,33 @@
+Final adversarial review against upstream guidance — November 25, 2026
+Starting commit: 4d04bffd39c09960ab21c4da6c934f7e05786bd2
+
+PASS release/diagnostics builds without compiler warnings; 385 synthetic assertions
+     (35 additions since the previous 350-assertion suite).
+PASS credential-bundle App/File/Both review and credential-safe draft recovery.
+PASS stale authenticated save/checkpoint rejection, intended-content readback,
+     KeePass protection/newline normalization and exact protected-password whitespace.
+PASS authenticated component inventory, omission/duplicate/unsupported-format
+     rejection, intact pending recovery and explicit legacy-format compatibility review.
+PASS generator/conflict/normal copy routing, ownership cleanup, unchanged text,
+     Windows exclusion formats and serialized zero DWORDs using in-memory data only.
+PASS changed-key late source preservation, blocked retry, destination retention and
+     final checkpoint/lock after incomplete transfer.
+PASS two separate startup processes refuse neighboring KeePass.exe and KeePass.dll
+     before any diagnostic fixture or vault access.
+PASS sixteen fictional renders; inspected credential conflict and compact browser.
+PASS release diagnostic/fault-hook exclusion; source inventory, links, secret/path
+     patterns, icon/source hashes and embedded dependency integrity.
+PASS bundled KeePass Authenticode signature remains Valid (Dominik Reichl).
+PASS GitHub private vulnerability reporting enabled and verified; no report submitted.
+No real vaults, actual factors, account-protection files, user clipboard or native
+unlocked password-manager UI accessed. See FINAL-AUDIT.md for comparison and limits.
+PASS release diagnostics exclusion and embedded dependency integrity
+PASS startup refuses neighboring KeePass.exe and KeePass.dll before diagnostics or vault access
+Release SHA-256: 20D1426F4662C0CB3862245257C5E1471BFFAE20416079FE033B691102D69531
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Previous stable-column/icon record (historical) ---
+
 Stable-column and Bootstrap icon follow-up — November 25, 2026
 Starting commit: bc22033506555c7f673eb57f7716558773efe1da
 

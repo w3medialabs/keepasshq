@@ -197,7 +197,7 @@ namespace VaultOrganizer
                         if (AfterSaveWrite != null) AfterSaveWrite(temp);
 #endif
                         // Full authenticated readback before replacing the last good database.
-                        VerifyEncrypted(temp, snapshot.MasterKey);
+                        VerifyEncrypted(temp, snapshot.MasterKey, snapshot);
                         if (!HashFile(PathName).SequenceEqual(expectedHash))
                             throw new ExternalChangeException();
                         byte[] hash = HashFile(temp);
@@ -289,7 +289,7 @@ namespace VaultOrganizer
             {
                 string temp = System.IO.Path.Combine(System.IO.Path.GetDirectoryName(dest), ".recovery-" + Guid.NewGuid().ToString("N") + ".tmp");
                 try {
-                    WriteEncrypted(snapshot, temp); VerifyEncrypted(temp, snapshot.MasterKey);
+                    WriteEncrypted(snapshot, temp); VerifyEncrypted(temp, snapshot.MasterKey, snapshot);
 #if DIAGNOSTICS
                     if (BeforeRecoveryPublish != null) BeforeRecoveryPublish(dest);
 #endif
@@ -305,11 +305,55 @@ namespace VaultOrganizer
             using (var stream = new FileStream(path, FileMode.CreateNew, FileAccess.Write, FileShare.None))
             { new KdbxFile(db).Save(new LeaveOpenStream(stream), null, KdbxFormat.Default, null); stream.Flush(true); }
         }
-        internal static void VerifyEncrypted(string path, CompositeKey key)
+        internal static void VerifyEncrypted(string path, CompositeKey key, PwDatabase expected = null)
         {
             var verify = new PwDatabase();
-            try { verify.Open(IOConnectionInfo.FromPath(path), key, null); }
+            try
+            {
+                verify.Open(IOConnectionInfo.FromPath(path), key, null); ValidateTree(verify);
+                if (expected != null) VerifyContent(expected, verify);
+            }
             finally { verify.Close(); }
+        }
+        internal static void VerifyContent(PwDatabase expected, PwDatabase actual)
+        {
+            ValidateTree(actual);
+            // KeePass writes standard-field protection using the source policy, then
+            // resets its in-memory policy to defaults on load. Check stored field flags
+            // separately; comparing the loaded policy would reject valid KeePass files.
+            RequireReadback(expected.RootGroup.EqualsGroup(actual.RootGroup, PwCompareOptions.IgnoreParentGroup | PwCompareOptions.NormalizeNewLines, MemProtCmpMode.CustomOnly), "entry/group content");
+            RequireReadback(expected.DataCipherUuid.Equals(actual.DataCipherUuid), "cipher");
+            RequireReadback(KdfParameters.SerializeExt(expected.KdfParameters).SequenceEqual(KdfParameters.SerializeExt(actual.KdfParameters)), "key derivation");
+            var stored = actual.RootGroup.GetEntries(true).ToDictionary(entry => entry.Uuid.ToHexString());
+            foreach (var entry in expected.RootGroup.GetEntries(true))
+            {
+                var found = stored[entry.Uuid.ToHexString()];
+                RequireReadback(new[] { entry }.Concat(entry.History).Zip(new[] { found }.Concat(found.History), (before, after) => StoredStringsMatch(before, after, expected.MemoryProtection)).All(matches => matches), "protected field content/flags");
+            }
+            RequireReadback(expected.CustomData.Equals(actual.CustomData), "private custom metadata");
+            RequireReadback(VariantDictionary.Serialize(expected.PublicCustomData).SequenceEqual(VariantDictionary.Serialize(actual.PublicCustomData)), "public custom metadata");
+            RequireReadback(expected.CustomIcons.Count == actual.CustomIcons.Count
+                && expected.CustomIcons.OrderBy(icon => icon.Uuid.ToHexString(), StringComparer.Ordinal)
+                    .Zip(actual.CustomIcons.OrderBy(icon => icon.Uuid.ToHexString(), StringComparer.Ordinal), (before, after) => before.Uuid.Equals(after.Uuid) && before.Name == after.Name && before.ImageDataPng.SequenceEqual(after.ImageDataPng)).All(matches => matches), "custom icons");
+            RequireReadback(expected.DeletedObjects.UCount == actual.DeletedObjects.UCount
+                && expected.DeletedObjects.OrderBy(deleted => deleted.Uuid.ToHexString(), StringComparer.Ordinal).ThenBy(deleted => deleted.DeletionTime)
+                    .Zip(actual.DeletedObjects.OrderBy(deleted => deleted.Uuid.ToHexString(), StringComparer.Ordinal).ThenBy(deleted => deleted.DeletionTime), (before, after) => before.Uuid.Equals(after.Uuid) && before.DeletionTime.Ticks / TimeSpan.TicksPerSecond == after.DeletionTime.Ticks / TimeSpan.TicksPerSecond).All(matches => matches), "deletion records");
+        }
+        private static void RequireReadback(bool matches, string area)
+        { if (!matches) throw new InvalidDataException("Encrypted readback differs in " + area + ". No candidate was published."); }
+        internal static bool StoredStringsMatch(PwEntry expected, PwEntry actual, MemoryProtectionConfig policy)
+        {
+            string[] fields = { PwDefs.TitleField, PwDefs.UserNameField, PwDefs.PasswordField, PwDefs.UrlField, PwDefs.NotesField };
+            bool[] protection = { policy.ProtectTitle, policy.ProtectUserName, policy.ProtectPassword, policy.ProtectUrl, policy.ProtectNotes };
+            foreach (var pair in expected.Strings)
+            {
+                int index = Array.IndexOf(fields, pair.Key); bool protect = index < 0 ? pair.Value.IsProtected : protection[index];
+                var value = actual.Strings.Get(pair.Key);
+                // XML normalizes unprotected CR/LF; protected values are base64 and
+                // must match exactly, including whitespace in passwords/custom fields.
+                if (value == null || value.IsProtected != protect || (protect && value.ReadString() != pair.Value.ReadString())) return false;
+            }
+            return true;
         }
         internal static byte[] HashFile(string path)
         {

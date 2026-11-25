@@ -43,15 +43,16 @@
 - Protection failures offer retry, recovery to another location, or explicit discard. Failure is never labeled as a successful lock.
 - Encrypted baseline/working/pending-conflict recovery branches survive restart. Existing drafts must be resumed, explicitly discarded, or left by canceling that database's opening.
 - Backup-only checkpoints remain discoverable; a damaged latest draft offers an explicit older-checkpoint fallback while preserving the damaged primary.
-- Unique encrypted save candidates, full decryption verification, atomic filesystem replacement, first-session backup, rolling previous copy and late-writer preservation.
+- Unique encrypted save/checkpoint candidates, decryption and intended-content readback checks, atomic filesystem replacement, first-session backup, rolling previous copy and late-writer preservation.
 - Replacement preimages start under unique encrypted filenames. An unreadable preimage blocks further publication in that session and remains preserved across later sessions.
 - SHA-256 change detection, three-way field/group/order reconciliation, conflict choices and complete Keep-both entry copies.
+- Review concurrent username/password/URL changes as one credential bundle; retain independent notes/custom fields. Authenticate new checkpoint component inventories and explicitly review legacy draft compatibility.
 
 ## Generator and clipboard
 
 - OS-backed cryptographic RNG; 8–128 characters; upper/lower/digits/symbols selectable; at least one of each chosen category.
 - Cancel does nothing; Copy copies and closes; Use fills the invoking field and closes without copying.
-- Clipboard ownership tracking clears app-owned text after about 30 seconds or on lock, without erasing another app's replacement. Busy-clipboard cleanup retries.
+- Explicit buttons and normal text copies throughout the window share cleanup tracking and Windows clipboard history/cloud exclusion formats. Matching-content cleanup runs after about 30 seconds or on lock, preserves different replacement text, and retries when busy. Exclusion/cleanup remain best-effort; see [security boundaries](SECURITY.md).
 
 ## Deliberate limits
 

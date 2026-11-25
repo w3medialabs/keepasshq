@@ -21,7 +21,7 @@ Reviewed November 25, 2026 against UI refresh commit `ffe0309b10a0609af23db269db
 
 The requested windowed startup, centered segmented view switch, right-side icon actions/far-right Settings, styled help/menus/dropdowns, primary-color notifications, password eyes, compact cards, white bordered panels/columns, narrow scrollbars, centered captions, database paths and folder/key icons are present. Lock, Close and Recovery copy retain their documented storage/lifecycle behavior and have explanatory help. No unrelated runtime dependencies, networking, dependency upgrades or legacy identifier changes were introduced.
 
-The current suite passes **350 assertions**, including twelve follow-up assertions after the prior 338. Fifteen previews render, including the actual dropdown template. Release metadata excludes the new synthetic input source and test workflow. Source inventory, documentation links, secret/personal-path patterns, branding and upstream source integrity checks pass. [VALIDATION.txt](VALIDATION.txt) records run evidence; [release instructions](RELEASING.md) describe local deployment.
+That UI follow-up passed **350 assertions**, including twelve additions after the prior 338, and rendered fifteen previews including the actual dropdown template. Release metadata excludes its synthetic input source and test workflow. Source inventory, documentation links, secret/personal-path patterns, branding and upstream source integrity checks passed. The later [upstream-guidance audit](FINAL-AUDIT.md) records the current 385 assertions, two dependency startup checks and sixteen previews. [VALIDATION.txt](VALIDATION.txt) records run evidence; [release instructions](RELEASING.md) describe local deployment.
 
 ## Limits
 

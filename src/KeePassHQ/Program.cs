@@ -29,10 +29,19 @@ namespace VaultOrganizer
         [MethodImpl(MethodImplOptions.NoInlining)]
         private static int Start(string[] args)
         {
-            // The managed KeePass implementation keeps this a single-file portable app.
-            KeePassLib.Native.NativeLib.AllowNative = false;
             try
             {
+                // CLR probing precedes AssemblyResolve. Refuse a neighboring assembly
+                // instead of silently using it in place of the embedded dependency.
+                var dependency = typeof(KeePassLib.PwDatabase).Assembly;
+                if (!String.IsNullOrEmpty(dependency.Location) || dependency.GetName().Version != new Version(2, 62, 0, 0))
+                {
+                    if (args.Length >= 2) return 2;
+                    MessageBox.Show("KeePassHQ requires its embedded KeePass 2.62 dependency. Run it from its own folder without another KeePass.exe or KeePass.dll beside it.", "KeePassHQ");
+                    return 1;
+                }
+                // The managed KeePass implementation keeps this a single-file portable app.
+                KeePassLib.Native.NativeLib.AllowNative = false;
                 var app = new Application();
                 using (Stream stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Theme.xaml"))
                     app.Resources.MergedDictionaries.Add((ResourceDictionary)System.Windows.Markup.XamlReader.Load(stream));

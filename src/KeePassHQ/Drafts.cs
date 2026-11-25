@@ -19,8 +19,11 @@ namespace VaultOrganizer
         private byte[] baselineCiphertext;
         private string draftNonce = Guid.NewGuid().ToString("N");
         private const string RoleKey = "VaultOrganizer.PrivateDraft.Role", NonceKey = "VaultOrganizer.PrivateDraft.Nonce";
+        private const string ComponentsKey = "VaultOrganizer.PrivateDraft.Components";
+        private const string BasicComponents = "working.kdbx,baseline.kdbx", PendingComponents = BasicComponents + ",pending-file.kdbx,pending-base.kdbx";
 #if DIAGNOSTICS
         internal static Action BeforeDraftPublish;
+        internal static Action<string> AfterDraftWrite;
         internal static string IsolatedDraftRoot;
 #endif
         public long DraftRevision = -1;
@@ -71,6 +74,7 @@ namespace VaultOrganizer
         {
             ValidateTree(Database); var current = Snapshot(Database); var original = baselineCiphertext == null ? Snapshot(baseline) : null; long revision = Revision;
             current.CustomData.Set(RoleKey, "working"); current.CustomData.Set(NonceKey, draftNonce);
+            current.CustomData.Set(ComponentsKey, pending == null ? BasicComponents : PendingComponents);
             if (original != null) { original.CustomData.Set(RoleKey, "baseline"); original.CustomData.Set(NonceKey, draftNonce); }
             PendingMergeData keepPending = pending == null ? null : pending.Clone();
             if (keepPending != null) { keepPending.File.CustomData.Set(RoleKey, "pending-file"); keepPending.File.CustomData.Set(NonceKey, draftNonce); keepPending.Baseline.CustomData.Set(RoleKey, "pending-base"); keepPending.Baseline.CustomData.Set(NonceKey, draftNonce); }
@@ -85,7 +89,7 @@ namespace VaultOrganizer
                     {
                         byte[] blob = EncryptBytes(original);
                         var verify = new PwDatabase(); verify.MasterKey = original.MasterKey;
-                        try { using (var memory = new MemoryStream(blob, false)) new KdbxFile(verify).Load(memory, KdbxFormat.Default, null); ValidateTree(verify); }
+                        try { using (var memory = new MemoryStream(blob, false)) new KdbxFile(verify).Load(memory, KdbxFormat.Default, null); VerifyContent(original, verify); }
                         finally { verify.Close(); }
                         baselineCiphertext = blob;
                     }
@@ -96,10 +100,17 @@ namespace VaultOrganizer
                         { ZipDatabase(archive, "working.kdbx", current); using (var stream = archive.CreateEntry("baseline.kdbx", CompressionLevel.NoCompression).Open()) stream.Write(baselineCiphertext, 0, baselineCiphertext.Length); if (keepPending != null) { ZipDatabase(archive,"pending-file.kdbx",keepPending.File); ZipDatabase(archive,"pending-base.kdbx",keepPending.Baseline); } }
                         file.Flush(true);
                     }
+#if DIAGNOSTICS
+                    if (AfterDraftWrite != null) AfterDraftWrite(temp);
+#endif
                     using (var file = File.OpenRead(temp)) using (var archive = new ZipArchive(file, ZipArchiveMode.Read))
                     {
-                        var a = ReadDatabase(archive, "working.kdbx", current.MasterKey); a.Close();
-                        if (keepPending != null) { var f = ReadDatabase(archive,"pending-file.kdbx",current.MasterKey);f.Close();var b=ReadDatabase(archive,"pending-base.kdbx",current.MasterKey);b.Close(); }
+                        var a = ReadDatabase(archive, "working.kdbx", current.MasterKey); try { VerifyContent(current, a); } finally { a.Close(); }
+                        if (keepPending != null)
+                        {
+                            var f = ReadDatabase(archive,"pending-file.kdbx",current.MasterKey); try { VerifyContent(keepPending.File, f); } finally { f.Close(); }
+                            var b = ReadDatabase(archive,"pending-base.kdbx",current.MasterKey); try { VerifyContent(keepPending.Baseline, b); } finally { b.Close(); }
+                        }
                         using (var stream = archive.GetEntry("baseline.kdbx").Open()) using (var memory = new MemoryStream(baselineCiphertext, false))
                             if (!Digest(stream).SequenceEqual(Digest(memory))) throw new InvalidDataException("Draft baseline readback failed.");
                     }
@@ -134,7 +145,16 @@ namespace VaultOrganizer
                     using (var archive = new ZipArchive(file, ZipArchiveMode.Read))
                     {
                         plan.Local = ReadDatabase(archive, "working.kdbx", key); plan.Baseline = ReadDatabase(archive, "baseline.kdbx", key);
-                        if (archive.GetEntry("pending-file.kdbx") != null || archive.GetEntry("pending-base.kdbx") != null)
+                        bool hasPending = archive.GetEntry("pending-file.kdbx") != null || archive.GetEntry("pending-base.kdbx") != null;
+                        string components = hasPending ? PendingComponents : BasicComponents;
+                        string declared = plan.Local.CustomData.Get(ComponentsKey);
+                        plan.LegacyRecovery = declared == null;
+                        // Older drafts have no manifest. Keep their format readable; new drafts
+                        // bind the complete component inventory inside authenticated ciphertext.
+                        if ((declared != null && declared != components) || !archive.Entries.Select(entry => entry.FullName).OrderBy(name => name, StringComparer.Ordinal).SequenceEqual(components.Split(',').OrderBy(name => name, StringComparer.Ordinal)))
+                            throw new InvalidDataException("Encrypted draft component inventory is incomplete or ambiguous.");
+                        plan.Local.CustomData.Remove(ComponentsKey);
+                        if (hasPending)
                         {
                             plan.RecoveredPending = new PendingMergeData();
                             plan.RecoveredPending.File = ReadDatabase(archive,"pending-file.kdbx",key); plan.RecoveredPending.Baseline = ReadDatabase(archive,"pending-base.kdbx",key);

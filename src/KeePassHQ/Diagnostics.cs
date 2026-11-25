@@ -82,10 +82,10 @@ namespace VaultOrganizer
             using (var plan = await session.ResumeDraftAsync()) { check(plan.Conflicts.Count == 0, "Draft can be resumed after timeout"); session.ApplyMerge(plan); } BuildPanes();
             check(session.Database.RootGroup.GetEntries(true).Any(x => VaultSession.Read(x, PwDefs.NotesField) == "UI draft-only secret marker"), "Draft preserves final field edit");
             entry = session.Database.RootGroup.GetEntries(true).First(x => x.Uuid.ToHexString() == id); session.Set(entry, PwDefs.UserNameField, "local-before-merge@example.test");
-            Tests.WriteOutside(path, db => { var e = db.RootGroup.GetEntries(true).First(x => x.Uuid.ToHexString() == id); e.Strings.Set(PwDefs.UrlField, new ProtectedString(false, "https://external.example.test")); e.Touch(true, false); });
+            Tests.WriteOutside(path, db => { var e = db.RootGroup.GetEntries(true).First(x => x.Uuid.ToHexString() == id); e.Strings.Set("External info", new ProtectedString(false, "Independent external information")); e.Touch(true, false); });
             check(await SaveNow(true), "Explicit save brings in compatible external changes");
             entry = session.Database.RootGroup.GetEntries(true).First(x => x.Uuid.ToHexString() == id);
-            check(!session.Dirty && !session.DraftExists && VaultSession.Read(entry, PwDefs.UserNameField) == "local-before-merge@example.test" && VaultSession.Read(entry, PwDefs.UrlField) == "https://external.example.test", "Published database contains all reconciled edits and clean draft is removed");
+            check(!session.Dirty && !session.DraftExists && VaultSession.Read(entry, PwDefs.UserNameField) == "local-before-merge@example.test" && VaultSession.Read(entry, "External info") == "Independent external information", "Published database contains all reconciled edits and clean draft is removed");
             session.Set(entry, PwDefs.PasswordField, "local-review"); Tests.WriteOutside(path, db => { var e = db.RootGroup.GetEntries(true).First(x => x.Uuid.ToHexString() == id); e.Strings.Set(PwDefs.PasswordField, new ProtectedString(true, "file-review")); e.Touch(true, false); });
             Task<bool> conflictSave = SaveNow(true); await WaitFor(() => mergeChoice != null || conflictSave.IsCompleted); check(mergeChoice != null, "Competing password changes require review"); FinishReview(MergeChoice.Both); check(await conflictSave, "Keep-both conflict review completes explicit save");
             check(session.Database.RootGroup.GetEntries(true).Any(x => VaultSession.Read(x, PwDefs.PasswordField) == "file-review" && VaultSession.Read(x,PwDefs.TitleField).EndsWith("(file copy)")), "Complete competing entry preserved");
@@ -133,6 +133,13 @@ namespace VaultOrganizer
                 panes[0].Path.Add(imports);panes[0].Expanded=imports.Entries.First().Uuid.ToHexString();panes[1].Path.Add(target);panes[1].Expanded=e.Uuid.ToHexString();RenderAll();
                 saveStatus.Text="Unsaved changes · encrypted draft protected · Ctrl+S to publish";
                 if(mode=="generator")ShowGenerator(FieldBox(panes[0],imports.Entries.First(),PwDefs.PasswordField));
+                if(mode=="conflict")
+                {
+                    var mine=imports.Entries.First();var file=mine.CloneDeep();
+                    file.Strings.Set(PwDefs.UserNameField,new ProtectedString(false,"other-identity@example.test"));file.Strings.Set(PwDefs.PasswordField,new ProtectedString(true,"fictional-file-password"));
+                    var conflict=new MergeConflict { Title=VaultSession.Read(mine,PwDefs.TitleField),MineEntry=mine,FileEntry=file,Credentials=true };
+                    conflict.Fields.AddRange(new[]{PwDefs.UserNameField,PwDefs.PasswordField,PwDefs.UrlField});ReviewConflict(conflict);
+                }
                 if(mode=="recovery") { var decision = AskPreviousCheckpoint(); }
                 if(mode=="settings"||mode=="dropdown")ShowSettings();
                 if(mode=="open")DatabaseDialog(panes[1],false);

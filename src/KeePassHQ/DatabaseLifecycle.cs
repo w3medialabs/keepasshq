@@ -32,7 +32,7 @@ namespace VaultOrganizer
                 db.KdfParameters = kdf.GetDefaultParameters();
                 db.KdfParameters.SetUInt64("M", 64UL * 1024 * 1024);
                 db.KdfParameters.SetUInt64("I", 3); db.KdfParameters.SetUInt32("P", 2);
-                WriteEncrypted(db, temp); VerifyEncrypted(temp, key);
+                WriteEncrypted(db, temp); VerifyEncrypted(temp, key, db);
 #if DIAGNOSTICS
                 if (BeforeCreatePublish != null) BeforeCreatePublish(path);
 #endif

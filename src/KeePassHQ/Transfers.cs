@@ -104,7 +104,7 @@ namespace VaultOrganizer
                 await Task.Run(() => readback.Open(IOConnectionInfo.FromPath(path), Destination.Database.MasterKey, null));
                 if (!expected.SequenceEqual(VaultSession.HashFile(path))) throw new IOException("The destination changed during verification.");
                 object card = Find(readback, ImportedId);
-                if (card == null || !EqualCard(Imported, card)) throw new IOException("The transferred card was changed or removed before verification. The source was kept.");
+                if (card == null || !EqualCard(Imported, card, Destination.Database.MemoryProtection)) throw new IOException("The transferred card was changed or removed before verification. The source was kept.");
                 foreach (var id in iconMap.Values)
                 {
                     var expectedIcon = Destination.Database.CustomIcons.First(i => i.Uuid.Equals(id));
@@ -117,16 +117,17 @@ namespace VaultOrganizer
         }
         private static object Find(PwDatabase db, string id)
         { return db.RootGroup.GetEntries(true).Cast<object>().Concat(db.RootGroup.GetGroups(true).Cast<object>()).FirstOrDefault(x => VaultSession.ItemId(x) == id); }
-        private static bool EqualCard(object left, object right)
+        private static bool EqualCard(object left, object right, MemoryProtectionConfig policy)
         {
             var a = left as PwEntry; var b = right as PwEntry;
             if (VaultSession.ParentOf(left) == null || VaultSession.ParentOf(right) == null || !VaultSession.ParentOf(left).Uuid.Equals(VaultSession.ParentOf(right).Uuid)) return false;
             if (a != null || b != null)
-                return a != null && b != null && a.EqualsEntry(b, PwCompareOptions.IgnoreParentGroup, MemProtCmpMode.Full);
+                return a != null && b != null && a.EqualsEntry(b, PwCompareOptions.IgnoreParentGroup | PwCompareOptions.NormalizeNewLines, MemProtCmpMode.CustomOnly)
+                    && new[] { a }.Concat(a.History).Zip(new[] { b }.Concat(b.History), (before, after) => VaultSession.StoredStringsMatch(before, after, policy)).All(matches => matches);
             var ga = (PwGroup)left; var gb = right as PwGroup;
-            if (gb == null || !ga.EqualsGroup(gb, PwCompareOptions.IgnoreParentGroup, MemProtCmpMode.Full)) return false;
+            if (gb == null || !ga.EqualsGroup(gb, PwCompareOptions.IgnoreParentGroup | PwCompareOptions.NormalizeNewLines, MemProtCmpMode.CustomOnly)) return false;
             var ca = VaultSession.Ordered(ga); var cb = VaultSession.Ordered(gb);
-            return ca.Count == cb.Count && ca.Select(VaultSession.ItemId).SequenceEqual(cb.Select(VaultSession.ItemId)) && ca.Zip(cb, (x, y) => EqualCard(x, y)).All(x => x);
+            return ca.Count == cb.Count && ca.Select(VaultSession.ItemId).SequenceEqual(cb.Select(VaultSession.ItemId)) && ca.Zip(cb, (x, y) => EqualCard(x, y, policy)).All(x => x);
         }
         internal void RemoveSource()
         {
@@ -182,6 +183,7 @@ namespace VaultOrganizer
                         {
                             var external = new PwDatabase();
                             try { external.Open(IOConnectionInfo.FromPath(result.ConcurrentPath), source.Database.MasterKey, null); source.HoldPending(external, result.ConcurrentBase); }
+                            catch { source.BlockUnresolvedPublishing(); throw; }
                             finally { external.Close(); }
                             throw new IOException("A concurrent source version was preserved. Review it before publishing again.");
                         }

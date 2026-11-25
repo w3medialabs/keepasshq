@@ -103,6 +103,7 @@ namespace VaultOrganizer
 
         public OrganizerWindow()
         {
+            DataObject.AddCopyingHandler(this, TrackTextCopy);
             Title = "KeePassHQ 1.2"; Width = Math.Min(1280, SystemParameters.WorkArea.Width * 0.9); Height = Math.Min(820, SystemParameters.WorkArea.Height * 0.9); MinWidth = 980; MinHeight = 640;
             FontFamily = new FontFamily("Segoe UI"); FontSize = 13; Foreground = Brush("#202B3C");
             WindowState = WindowState.Normal; WindowStartupLocation = WindowStartupLocation.CenterScreen;
@@ -355,7 +356,6 @@ namespace VaultOrganizer
             UiVisual.Help(input, "Edit " + label.ToLowerInvariant() + ". Changes stay private until you save the database.");
             System.Windows.Automation.AutomationProperties.SetName(input, label); SpellCheck.SetIsEnabled(input, false); row.Children.Add(input);
             pane.Editors.Add(input);
-            DataObject.AddCopyingHandler(input, (sender, args) => { if (args.DataObject.GetDataPresent(DataFormats.UnicodeText)) OwnClipboard(args.DataObject.GetData(DataFormats.UnicodeText) as string); });
             input.GotKeyboardFocus += (sender, args) => frame.BorderBrush = Brush("#7198ED");
             input.LostKeyboardFocus += (sender, args) => frame.BorderBrush = Brush("#DDE4ED");
             string editId = pane.Session.PathName + entry.Uuid.ToHexString() + field;
@@ -592,7 +592,7 @@ namespace VaultOrganizer
                 Grid.SetColumn(column, side); compare.Children.Add(column);
             }
             body.Children.Add(compare);
-            var hint = Text("Other, nonconflicting changes are kept automatically.", 11, "#7D8A9E"); hint.Margin = new Thickness(0, 12, 0, 15); body.Children.Add(hint);
+            var hint = Text(conflict.Credentials ? "Username, password and URL are selected together. Other nonconflicting changes are kept." : "Other, nonconflicting changes are kept automatically.", 11, "#7D8A9E"); hint.TextWrapping = TextWrapping.Wrap; hint.Margin = new Thickness(0, 12, 0, 15); body.Children.Add(hint);
             var buttons = new WrapPanel { HorizontalAlignment = HorizontalAlignment.Right };
             buttons.Children.Add(Button("Later", () => FinishReview(MergeChoice.Cancel), "Quiet"));
             buttons.Children.Add(Button("Use app edits", () => FinishReview(MergeChoice.Mine), null));

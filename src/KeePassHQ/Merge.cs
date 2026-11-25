@@ -14,7 +14,7 @@ namespace VaultOrganizer
     internal sealed class MergeConflict
     {
         public string Id, Title;
-        public bool IsGroup, Presence;
+        public bool IsGroup, Presence, Credentials;
         public PwEntry MineEntry, FileEntry;
         public PwGroup MineGroup, FileGroup;
         public readonly List<string> Fields = new List<string>();
@@ -24,10 +24,11 @@ namespace VaultOrganizer
 
     internal sealed class MergePlan : IDisposable
     {
+        private static readonly string[] CredentialFields = { PwDefs.UserNameField, PwDefs.PasswordField, PwDefs.UrlField };
         public PwDatabase Local, External, Baseline, DiskBaseline;
         public byte[] FileHash;
         public long Revision;
-        public bool CompletesPending;
+        public bool CompletesPending, LegacyRecovery;
         public PendingMergeData RecoveredPending;
         public readonly List<MergeConflict> Conflicts = new List<MergeConflict>();
         private readonly HashSet<string> covered = new HashSet<string>();
@@ -105,11 +106,17 @@ namespace VaultOrganizer
                 { conflict.Presence = true; conflict.Fields.Add(mine == null ? "Entry deleted in app; edited in file" : "Entry edited in app; deleted in file"); }
                 else if (mine != null && file != null)
                 {
+                    // Independent credential edits can produce a username/password/URL
+                    // combination that existed in neither version. Review that tuple as one.
+                    conflict.Credentials = CredentialFields.Any(field => !Same(mine.Strings.Get(field), original == null ? null : original.Strings.Get(field)))
+                        && CredentialFields.Any(field => !Same(file.Strings.Get(field), original == null ? null : original.Strings.Get(field)))
+                        && CredentialFields.Any(field => !Same(mine.Strings.Get(field), file.Strings.Get(field)));
                     foreach (string field in mine.Strings.GetKeys().Union(file.Strings.GetKeys()))
                     {
                         ProtectedString a = mine.Strings.Get(field), b = file.Strings.Get(field), before = original == null ? null : original.Strings.Get(field);
                         if (!Same(a, b) && !Same(a, before) && !Same(b, before)) conflict.Fields.Add(field);
                     }
+                    if (conflict.Credentials) foreach (string field in CredentialFields) if (!conflict.Fields.Contains(field)) conflict.Fields.Add(field);
                     if (original != null && Parent(mine) != Parent(original) && Parent(file) != Parent(original) && Parent(mine) != Parent(file)) conflict.Fields.Add("Group location");
                 }
                 if (conflict.Fields.Count > 0) Conflicts.Add(conflict);
@@ -179,7 +186,8 @@ namespace VaultOrganizer
                     foreach (string field in mine.Strings.GetKeys().Union(file.Strings.GetKeys()).Union(before == null ? new List<string>() : before.Strings.GetKeys()))
                     {
                         ProtectedString a = mine.Strings.Get(field), b = file.Strings.Get(field), original = before == null ? null : before.Strings.Get(field);
-                        ProtectedString chosen = Same(a, original) ? b : (Same(b, original) || Same(a, b) || mineWins ? a : b);
+                        ProtectedString chosen = conflict != null && conflict.Credentials && CredentialFields.Contains(field) ? (mineWins ? a : b)
+                            : (Same(a, original) ? b : (Same(b, original) || Same(a, b) || mineWins ? a : b));
                         if (chosen != null) strings.Set(field, chosen);
                         if (!Same(chosen, b)) differs = true;
                     }

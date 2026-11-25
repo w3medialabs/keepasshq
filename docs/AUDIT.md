@@ -6,6 +6,8 @@ No real vault, real master key, real key file, Windows account-protection file o
 
 The original package review below is historical evidence. The subsequent [adversarial follow-up](ADVERSARIAL-AUDIT.md) found and corrected additional edge cases and expanded validation to 329 assertions; it does not convert either review into independent certification.
 
+The latest [upstream-guidance audit](FINAL-AUDIT.md) records additional reproduced credential/recovery/clipboard/dependency gaps and their fixes, with current validation in [VALIDATION.txt](VALIDATION.txt).
+
 ## Corrections verified
 
 | Area | Risk addressed | Resolution |
