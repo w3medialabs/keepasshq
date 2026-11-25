@@ -25,6 +25,7 @@ Use a disposable copy first. Passwords are deliberately visible while entries ar
 ## Focused features
 
 - Identical card browsers in both modes; independent navigation, shared live edits when browsing the same database.
+- Independent search bars in both browsers, with searchable names/usernames/URLs/notes/group paths and links back to each result's folder.
 - Five editable fields: name, username, password, URL, and selectable multiline notes. Integrated cut/copy/paste actions.
 - Create groups and entries at any level, rename groups, reorder mixed cards, and move in either direction. Active groups are green.
 - Open or create a different database from either pane's **Database** menu. Keys, models, drafts, saves, and file gates remain separate.
@@ -62,6 +63,6 @@ cd keepasshq
 powershell -NoProfile -File .\validate.ps1 -Render
 ```
 
-Builds use the bundled, hash-pinned KeePass 2.62 dependency without package restore. Validation checks source inventory, documentation links and provenance, builds release and diagnostics, checks release boundaries and dependency integrity, runs 385 synthetic assertions and two dependency-shadow startup checks, and renders sixteen fictional previews. To create a local portable deployment with a fictional demo, run `powershell -NoProfile -File .\package.ps1 -Demo` from a clean committed checkout; see [release instructions](docs/RELEASING.md). See [Contributing](CONTRIBUTING.md) before opening a [pull request](https://github.com/w3medialabs/keepasshq/pulls).
+Builds use the bundled, hash-pinned KeePass 2.62 dependency without package restore. Validation checks source inventory, documentation links and provenance, builds release and diagnostics, checks release boundaries and dependency integrity, runs 411 synthetic assertions and two dependency-shadow startup checks, and renders seventeen fictional previews. To create a local portable deployment with a fictional demo, run `powershell -NoProfile -File .\package.ps1 -Demo` from a clean committed checkout; see [release instructions](docs/RELEASING.md). See [Contributing](CONTRIBUTING.md) before opening a [pull request](https://github.com/w3medialabs/keepasshq/pulls).
 
 This is an independent application using KeePass technology, not an official KeePass release. The house-lock mark is from [Bootstrap Icons](https://icons.getbootstrap.com/icons/house-lock/), used under MIT. KeePassHQ and its combined distribution are GPL-2.0-or-later; see [LICENSE](LICENSE).

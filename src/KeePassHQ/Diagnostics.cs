@@ -133,6 +133,11 @@ namespace VaultOrganizer
                 panes[0].Path.Add(imports);panes[0].Expanded=imports.Entries.First().Uuid.ToHexString();panes[1].Path.Add(target);panes[1].Expanded=e.Uuid.ToHexString();RenderAll();
                 saveStatus.Text="Unsaved changes · encrypted draft protected · Ctrl+S to publish";
                 if(mode=="generator")ShowGenerator(FieldBox(panes[0],imports.Entries.First(),PwDefs.PasswordField));
+                if(mode=="search")
+                {
+                    panes[0].Search.Text="email";panes[0].SearchExpanded=imports.Entries.First().Uuid.ToHexString();RenderPane(panes[0]);
+                    panes[1].Search.Text="subscription";panes[1].SearchExpanded=root.GetEntries(true).First(entry=>VaultSession.Read(entry,PwDefs.TitleField)=="Reading subscription").Uuid.ToHexString();RenderPane(panes[1]);
+                }
                 if(mode=="conflict")
                 {
                     var mine=imports.Entries.First();var file=mine.CloneDeep();

@@ -29,6 +29,10 @@ namespace VaultOrganizer
         public ScrollViewer Scroll;
         public TextBlock Count;
         public TextBlock FilePath;
+        public TextBox Search;
+        public bool SearchActive, SuppressSearch;
+        public string SearchExpanded;
+        public double BrowseOffset;
         public string Expanded;
         public readonly List<TextBox> Editors = new List<TextBox>();
         public readonly Dictionary<string, Button> EntryHeaders = new Dictionary<string, Button>();
@@ -230,25 +234,39 @@ namespace VaultOrganizer
 
         private void BuildPanes()
         {
+            var previous = panes.ToArray();
             workspace.Children.Clear(); panes.Clear();
             for (int side = 0; side < 2; ++side)
             {
                 var owner = side == 0 ? session : (otherSession ?? session);
+                var prior = previous.Length > side && previous[side].Session == owner ? previous[side] : null;
                 var pane = new BrowserPane { Root = owner.Database.RootGroup, Session = owner }; pane.Path.Add(pane.Root); panes.Add(pane);
+                if (prior != null && prior.SearchActive)
+                {
+                    foreach (var oldGroup in prior.Path.Skip(1))
+                    {
+                        var group = pane.Path.Last().Groups.FirstOrDefault(child => child.Uuid.Equals(oldGroup.Uuid));
+                        if (group == null) break; pane.Path.Add(group);
+                    }
+                    pane.Expanded = prior.Expanded;
+                }
                 var layout = new Grid { Margin = new Thickness(8, 10, 8, 8) }; pane.Layout = layout;
-                layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); layout.RowDefinitions.Add(new RowDefinition());
-                var panelFrame = new Border { BorderBrush = Brush("#DDE5EF"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(10), Background = Brushes.White, IsHitTestVisible = false }; Grid.SetRowSpan(panelFrame, 2); layout.Children.Add(panelFrame);
+                layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); layout.RowDefinitions.Add(new RowDefinition { Height = GridLength.Auto }); layout.RowDefinitions.Add(new RowDefinition());
+                var panelFrame = new Border { BorderBrush = Brush("#DDE5EF"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(10), Background = Brushes.White, IsHitTestVisible = false }; Grid.SetRowSpan(panelFrame, 3); layout.Children.Add(panelFrame);
                 var heading = new StackPanel { Margin = new Thickness(13, 12, 48, 12) };
                 pane.Heading = Text("Database", 18, "#25334B"); pane.Heading.FontWeight = FontWeights.SemiBold; pane.Heading.TextTrimming = TextTrimming.CharacterEllipsis;
                 pane.Count = Text("", 11, "#718096"); pane.Count.Margin = new Thickness(0, 3, 0, 3);
                 pane.FilePath = Text("", 10.5, "#8694A8"); pane.FilePath.TextWrapping = TextWrapping.Wrap;
                 heading.Children.Add(pane.Heading); heading.Children.Add(pane.Count); heading.Children.Add(pane.FilePath); layout.Children.Add(heading);
                 var databaseButton = IconButton("folder", "Database actions · open, create, close, or save an encrypted recovery copy", () => PaneDatabaseMenu(pane)); databaseButton.HorizontalAlignment = HorizontalAlignment.Right; databaseButton.VerticalAlignment = VerticalAlignment.Top; databaseButton.Margin = new Thickness(0, 10, 10, 0); layout.Children.Add(databaseButton);
+                var search = SearchBar(pane, prior == null || prior.Search == null ? "" : prior.Search.Text); Grid.SetRow(search, 1); layout.Children.Add(search);
+                if (prior != null) { pane.SearchExpanded = prior.SearchExpanded; pane.BrowseOffset = prior.BrowseOffset; }
                 pane.Columns = new StackPanel { Orientation = Orientation.Horizontal };
                 pane.Scroll = new ScrollViewer { Content = pane.Columns, Margin = new Thickness(10, 0, 10, 10), HorizontalScrollBarVisibility = ScrollBarVisibility.Auto, VerticalScrollBarVisibility = ScrollBarVisibility.Disabled, PanningMode = PanningMode.HorizontalOnly };
                 pane.Scroll.Style = (Style)Application.Current.FindResource(typeof(ScrollViewer));
-                Grid.SetRow(pane.Scroll, 1); layout.Children.Add(pane.Scroll); Grid.SetColumn(layout, side); workspace.Children.Add(layout); if (side == 0 || organizerMode) RenderPane(pane);
+                Grid.SetRow(pane.Scroll, 2); layout.Children.Add(pane.Scroll); Grid.SetColumn(layout, side); workspace.Children.Add(layout); if (side == 0 || organizerMode) RenderPane(pane);
             }
+            foreach (var prior in previous) ClearSearchInput(prior);
             SwitchMode(organizerMode);
             UpdateInteraction();
         }
@@ -267,6 +285,7 @@ namespace VaultOrganizer
             pane.Heading.Text = System.IO.Path.GetFileName(pane.Session.PathName);
             pane.FilePath.Text = rendering ? (pane.Session == otherSession ? @"C:\Examples\KeePassHQ\Second database\Demo.kdbx" : @"C:\Examples\KeePassHQ\Demo.kdbx") : pane.Session.PathName;
             UiVisual.Help(pane.FilePath, pane.FilePath.Text);
+            if (pane.SearchActive) { RenderSearch(pane, recordCount); return; }
             for (int depth = 0; depth < pane.Path.Count; ++depth)
             {
                 int columnDepth = depth; PwGroup current = pane.Path[depth];
@@ -330,10 +349,10 @@ namespace VaultOrganizer
         }
         private Border EntryCard(BrowserPane pane, PwEntry entry)
         {
-            bool expanded = pane.Expanded == entry.Uuid.ToHexString();
+            bool expanded = ExpandedEntry(pane) == entry.Uuid.ToHexString();
             var border = new Border { CornerRadius = new CornerRadius(6), Background = Brushes.White, BorderBrush = Brush(expanded ? "#B9CBE9" : "#E0E6EE"), BorderThickness = new Thickness(1), Margin = new Thickness(0, 0, 0, 4) };
             var stack = new StackPanel(); border.Child = stack;
-            var header = CardHeader(VaultSession.Read(entry, PwDefs.TitleField), false, () => { pendingField = null; pane.Expanded = expanded ? null : entry.Uuid.ToHexString(); RenderPane(pane); }, expanded);
+            var header = CardHeader(VaultSession.Read(entry, PwDefs.TitleField), false, () => { pendingField = null; if (pane.SearchActive) pane.SearchExpanded = expanded ? null : entry.Uuid.ToHexString(); else pane.Expanded = expanded ? null : entry.Uuid.ToHexString(); RenderPane(pane); }, expanded);
             header.Tag = entry.Uuid.ToHexString(); pane.EntryHeaders[entry.Uuid.ToHexString()] = header; WireDrag(header, entry); stack.Children.Add(header);
             if (expanded)
             {
@@ -473,7 +492,7 @@ namespace VaultOrganizer
         private void Push(string label, Action restore) { RecordAction(); undo.Add(new UndoItem { Label = label, Restore = restore }); if (undo.Count > 40) undo.RemoveAt(0); undoButton.IsEnabled = true; }
         private void Undo()
         {
-            if (locked || session == null || undo.Count == 0 || sealing || !workspace.IsEnabled || veil.Visibility == Visibility.Visible) return;
+            if (locked || session == null || undo.Count == 0 || sealing || !workspace.IsEnabled || veil.Visibility == Visibility.Visible || panes.Any(pane => pane.Search != null && pane.Search.IsKeyboardFocusWithin)) return;
             UndoItem item = undo[undo.Count - 1]; undo.RemoveAt(undo.Count - 1); item.Restore(); RecordAction(); pendingField = null; RenderAll(); Toast("Undid: " + item.Label + ".", false);
         }
 
@@ -622,7 +641,7 @@ namespace VaultOrganizer
         private void ClearViewsAndClipboard()
         {
             hoverTimer.Stop(); hoverGroup = null; hoverPane = null; dragging = null; pendingField = null;
-            foreach (BrowserPane pane in panes) ClearText(pane.Columns);
+            foreach (BrowserPane pane in panes) { ClearText(pane.Columns); ClearSearchInput(pane); }
             workspace.Children.Clear(); panes.Clear();
             ClearOwnedClipboard(true);
         }
@@ -665,6 +684,8 @@ namespace VaultOrganizer
         private void OnKey(object sender, KeyEventArgs e)
         {
             Activity();
+            if ((Keyboard.Modifiers & ModifierKeys.Control) != 0 && e.Key == Key.F && workspace.IsEnabled)
+            { var pane = panes.FirstOrDefault(p => p.Layout.IsKeyboardFocusWithin && p.Layout.Visibility == Visibility.Visible) ?? panes.FirstOrDefault(p => p.Layout.Visibility == Visibility.Visible); if (pane != null) { pane.Search.Focus(); pane.Search.SelectAll(); e.Handled = true; } }
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0 && e.Key == Key.S) { e.Handled = true; if (!locked) { var unused = SaveNow(true); } }
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0 && e.Key == Key.L) { e.Handled = true; var unused = Seal(false); }
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0 && e.Key == Key.Z && !locked) { e.Handled = true; Undo(); }

@@ -12,6 +12,8 @@
 
 - Viewer has one pane. Organizer has equal left/right panes with the same controls and behavior.
 - Both start at the same root. Navigation is independent; the underlying session is shared until another database is opened.
+- A search bar at the top of each browser filters that database independently. Case-insensitive literal words match names, usernames, URLs, notes and group paths; every word must match. Password fields, hidden fields/history/attachments, enabled recycle-bin contents and search-disabled groups are excluded.
+- Open/edit matching cards, drag them to a normal browser destination, or use their group link to return to their folder. Clear/Escape restores prior browsing; Ctrl+F focuses the active browser's search. Queries stay private to the current session and clear on lock/close.
 - Groups and entries appear together as title-only cards. Clicking a group adds its child column. Clicking an entry expands it in place without changing the column width.
 - Live name, username, password, URL and notes editing; visible passwords by design. Text actions are integrated into inputs. Notes support selection and extraction into manually created entries.
 - Create entries/groups at any visible level; rename a group through its context menu.
@@ -56,7 +58,7 @@
 
 ## Deliberate limits
 
-Windows x64 only. No browser integration, autofill, URL/command execution, plugins, sync engine, account service, search UI, bulk import/export, key-file generation, master-key change UI, attachment/history editor, full KeePass settings editor, or record deletion UI. Viewer uses the same live editor; it is not a read-only mode. Other clients may display their own sorting and ignore the custom mixed-order metadata.
+Windows x64 only. No browser integration, autofill, URL/command execution, plugins, sync engine, account service, regex/XPath search or search profiles, bulk import/export, key-file generation, master-key change UI, attachment/history editor, full KeePass settings editor, or record deletion UI. Viewer uses the same live editor; it is not a read-only mode. Other clients may display their own sorting and ignore the custom mixed-order metadata.
 
 No distributed OneDrive lock, guaranteed RAM/pagefile erasure, clipboard-history erasure, automatic resolution of unknown changed keys, publisher signature, independent penetration test, or guarantee against a compromised OS. See [SECURITY.md](SECURITY.md).
 

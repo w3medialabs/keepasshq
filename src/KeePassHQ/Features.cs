@@ -82,7 +82,7 @@ namespace VaultOrganizer
                 Button button; if (!pane.EntryHeaders.TryGetValue(id, out button)) continue;
                 var grid = button.Content as Grid; if (grid != null) { var name = (TextBlock)grid.Children[1]; name.Text = String.IsNullOrWhiteSpace(value) ? "Untitled" : value; name.ToolTip = value; }
                 string display=String.IsNullOrWhiteSpace(value)?"Untitled":value;
-                UiVisual.Help(button,(pane.Expanded==id?"Collapse entry: ":"Expand entry: ")+display+". Drag this header to move or reorder the card.");
+                UiVisual.Help(button,(ExpandedEntry(pane)==id?"Collapse entry: ":"Expand entry: ")+display+". Drag this header to move or reorder the card.");
                 System.Windows.Automation.AutomationProperties.SetName(button,"Entry: "+display);
             }
         }

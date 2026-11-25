@@ -311,6 +311,8 @@ namespace VaultOrganizer
                 log.Add("PASS revealed-field keyboard submission, empty-session exit cleanup and styled-control behavior");
                 window=new OrganizerWindow();RunUiWorkflow(window.TestFinalAuditWorkflow(System.IO.Path.Combine(run,"final-audit-ui"),Check),"final adversarial review");
                 log.Add("PASS generator copy ownership, clipboard exclusion formats and unreadable transfer-source blocking");
+                window=new OrganizerWindow();RunUiWorkflow(window.TestBrowserSearch(System.IO.Path.Combine(run,"browser-search"),Check),"per-browser search");
+                log.Add("PASS independent browser search, scope/exclusions, mirrored result editing, navigation restoration and query cleanup");
                 log.Add("PASS "+checks+" assertions; fictional data and an isolated clipboard only");File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 0;
             }
             catch(Exception ex){log.Add("FAIL "+ex.ToString());File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 1;}

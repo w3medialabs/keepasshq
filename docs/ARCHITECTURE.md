@@ -6,6 +6,8 @@ The application is a C# 5 / WPF desktop executable targeting the x64 .NET Framew
 
 Each VaultSession owns a PwDatabase, baseline snapshot, expected file hash, revision counters, private checkpoint branch and local gate. With one file, both BrowserPane instances share that exact session and use independent paths/expanded cards. With two files, each has its own session; ownership is resolved from object ancestry rather than UUID alone, because copied databases can contain identical UUIDs. Same-file Windows path aliases are rejected before opening a second session.
 
+Each BrowserPane also owns a transient search input and separate search expansion state. Literal all-term matching reads the current session's name/username/URL/notes fields and group paths, honors inherited search exclusions and omits enabled recycle-bin contents. Search never evaluates regex/placeholders or reads password/custom/history/attachment fields. A flat results column reuses entry editors and drag sources; it supplies no ambiguous drop target. Clearing restores the untouched browser path/expansion. Same-session rebuilds preserve queries; database changes reset the affected query. Detached inputs and lock/close clear query text with undo disabled, and queries never enter the storage model.
+
 All live model changes are on the UI thread. Save/checkpoint snapshots are made before worker encryption. Explicit saves disable editing and serialize through one task. Lifecycle decisions block background interaction. Closing/locking during protection or cross-file commits is queued until data is protected or a clear failure state is shown.
 
 ## Model and ordering

@@ -17,7 +17,7 @@ try {
     $diagnosticMetadata = [Text.Encoding]::ASCII.GetString($diagnosticBytes)
     foreach ($name in @('Tests', 'IsolatedClipboard', 'BeforeRecoveryPublish', 'AfterSaveWrite',
         'BeforeSaveReplace', 'AfterSaveReplace', 'BeforeDraftPublish', 'AfterDraftWrite', 'BeforeCreatePublish', 'RenderDemo',
-        'TestWorkflow', 'TestMultipleDatabases', 'AuditChecks', 'TestAuditWorkflow', 'TestPasswordReveal', 'TestUiCompleteness', 'SyntheticInputSource', 'IsolatedDraftRoot', 'FinalAuditChecks', 'TestFinalAuditWorkflow', 'PwDatabaseScope', 'RunUiWorkflow', 'RewriteDraftWorking')) {
+        'TestWorkflow', 'TestMultipleDatabases', 'AuditChecks', 'TestAuditWorkflow', 'TestPasswordReveal', 'TestUiCompleteness', 'SyntheticInputSource', 'IsolatedDraftRoot', 'FinalAuditChecks', 'TestFinalAuditWorkflow', 'PwDatabaseScope', 'RunUiWorkflow', 'RewriteDraftWorking', 'TestBrowserSearch')) {
         $token = $name + [char]0
         if ($releaseMetadata.Contains($token) -or !$diagnosticMetadata.Contains($token)) {
             throw "Release/diagnostics metadata boundary failed: $name"
@@ -56,7 +56,7 @@ try {
     if ($Render) {
         $renderRoot = Join-Path $results 'renders'
         New-Item -ItemType Directory -Path $renderRoot -Force | Out-Null
-        foreach ($mode in @('viewer', 'organizer', 'generator', 'gap', 'unlock', 'create', 'dual', 'recovery', 'reminder', 'open', 'settings', 'toast', 'compact', 'tooltip', 'dropdown', 'conflict')) {
+        foreach ($mode in @('viewer', 'organizer', 'generator', 'gap', 'unlock', 'create', 'dual', 'recovery', 'reminder', 'open', 'settings', 'toast', 'compact', 'tooltip', 'dropdown', 'conflict', 'search')) {
             $image = Join-Path $renderRoot ($mode + '.png')
             $process = Start-Process -FilePath $diagnosticsPath -ArgumentList @('--render-demo', ('"' + $image + '"'), $mode) -WindowStyle Hidden -Wait -PassThru
             if ($process.ExitCode -ne 0 -or !(Test-Path -LiteralPath $image)) { throw "Synthetic render failed: $mode" }

@@ -29,7 +29,7 @@ The included mirror ZIP has different wrapping/layout from the official `KeePass
 
 The logo/app icon uses the unmodified house-lock geometry from [Bootstrap Icons](https://icons.getbootstrap.com/icons/house-lock/), recolored blue for KeePassHQ and rasterized for WPF/Windows icon sizes. Copyright (c) 2019–2024 The Bootstrap Authors. MIT license reproduced in `third_party/Bootstrap-Icons-LICENSE.txt` and in the portable distribution. Original SVG is in `assets/house-lock.svg`; branded SVG/PNG/ICO are adjacent. No endorsement by Bootstrap is implied.
 
-Toolbar, card and field-action icons use eighteen unmodified SVGs from [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/ce0e49dd063243118a115f17ad1fe1fe7576d552), commit `ce0e49dd063243118a115f17ad1fe1fe7576d552`. Their original sources, matching MIT license, hashes and action mapping are included in [assets/bootstrap-icons](assets/bootstrap-icons/README.md). WPF renders their filled vector paths locally, preserving each path's fill rule and original viewBox. These assets are embedded into the portable executable, with no runtime download or additional rendering library.
+Toolbar, card, search and field-action icons use nineteen unmodified SVGs from [Bootstrap Icons 1.13.1](https://github.com/twbs/icons/tree/ce0e49dd063243118a115f17ad1fe1fe7576d552), commit `ce0e49dd063243118a115f17ad1fe1fe7576d552`. Their original sources, matching MIT license, hashes and action mapping are included in [assets/bootstrap-icons](assets/bootstrap-icons/README.md). WPF renders their filled vector paths locally, preserving each path's fill rule and original viewBox. These assets are embedded into the portable executable, with no runtime download or additional rendering library.
 
 ## Platform
 

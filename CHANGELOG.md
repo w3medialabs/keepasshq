@@ -2,6 +2,8 @@
 
 ## Unreleased
 
+- Add an independent styled search bar to each browser, with match counts, literal all-word matching across names/usernames/URLs/notes/group paths, editable results, folder links, Ctrl+F and clear/Escape navigation restoration. Respect search-disabled groups and recycle-bin exclusions; keep queries transient and clear them on lock/close.
+- Add 26 search regressions (411 total assertions) and a seventeenth fictional preview. Bundle the pinned Bootstrap search SVG with its source/hash and MIT attribution.
 - Final adversarial review against KeePass/Microsoft guidance: require whole username/password/URL bundle review for concurrent credential edits; preserve independent notes and Keep-both versions.
 - Compare intended content against encrypted save/create/recovery/checkpoint readback, including history, protected fields, cipher/KDF, custom data/icons and tombstones; reject valid-but-stale candidates.
 - Authenticate new draft component inventories, reject missing/ambiguous components, and require explicit compatibility review for older drafts while preserving legacy paths and identifiers.

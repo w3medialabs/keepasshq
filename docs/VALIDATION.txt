@@ -1,3 +1,28 @@
+Per-browser search — November 25, 2026
+Starting commit: 641cc6b8999d367eebcd2d517dddd0ddcbbeba9b
+
+PASS release/diagnostics builds and 411 synthetic assertions (26 search additions).
+PASS independent same/separate-session queries, all-term/case-insensitive literal
+     matching, nested group paths, notes and password/hidden/history exclusions.
+PASS inherited search-disabled groups, explicit child overrides and recycle-bin
+     exclusion; search/navigation alone leaves revision and file bytes unchanged.
+PASS clear-button/Escape restoration, result folder links, stable mirrored editing,
+     Enter refresh, same-session rebuild context, mode switching, database reset,
+     normal publication, one-pane closure and lock clearing both query controls.
+PASS seventeen fictional renders; inspected search results, normal Organizer and
+     compact layouts. Search uses the original pinned Bootstrap search SVG.
+PASS source inventory, documentation links, secret/personal-path patterns, nineteen
+     icon hashes, matching upstream source hash, release diagnostics exclusion,
+     embedded dependency integrity and both neighboring-assembly startup checks.
+Search queries are not stored in settings, databases or drafts. Password fields are
+excluded; notes remain searchable as text. Existing audit/environment limits apply.
+PASS release diagnostics exclusion and embedded dependency integrity
+PASS startup refuses neighboring KeePass.exe and KeePass.dll before diagnostics or vault access
+Release SHA-256: 904F648367137ABDA062F9F7A8DF4774C82AC05271CE57EB1BF86CD77FB7F7CA
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Previous adversarial review record (historical) ---
+
 Final adversarial review against upstream guidance — November 25, 2026
 Starting commit: 4d04bffd39c09960ab21c4da6c934f7e05786bd2
 

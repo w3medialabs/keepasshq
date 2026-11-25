@@ -28,7 +28,7 @@ Recommended complete check, from any working directory:
 powershell -NoProfile -File .\validate.ps1 -Render
 ```
 
-Use the full path to `validate.ps1` when outside the checkout. The script checks source inventory, secret/personal-path patterns, Markdown links, corresponding upstream source hash, bundled Bootstrap SVG hashes and branding assets; builds both variants; verifies release diagnostics exclusion and the embedded dependency hash; runs the suite and two neighboring-assembly startup rejection checks; and optionally renders all sixteen previews. Omit `-Render` for the same checks without previews. Summaries and generated fictional data stay under ignored `test-output/`; build output stays under `bin/` and `bin-diagnostics/`. Run the executable from its own folder; an adjacent KeePass.exe/KeePass.dll is refused instead of silently replacing the embedded dependency.
+Use the full path to `validate.ps1` when outside the checkout. The script checks source inventory, secret/personal-path patterns, Markdown links, corresponding upstream source hash, bundled Bootstrap SVG hashes and branding assets; builds both variants; verifies release diagnostics exclusion and the embedded dependency hash; runs the suite and two neighboring-assembly startup rejection checks; and optionally renders all seventeen previews. Omit `-Render` for the same checks without previews. Summaries and generated fictional data stay under ignored `test-output/`; build output stays under `bin/` and `bin-diagnostics/`. Run the executable from its own folder; an adjacent KeePass.exe/KeePass.dll is refused instead of silently replacing the embedded dependency.
 
 Run `powershell -NoProfile -File .\scripts\check-source.ps1` for source checks alone. Git checkouts inspect tracked and unignored files; extracted archives inspect the documented source directories. Pattern checks support manual review and do not establish that arbitrary content is free of secrets.
 
@@ -45,7 +45,7 @@ if ($process.ExitCode -ne 0) { throw 'Synthetic checks failed' }
 
 GUI executables need `Start-Process -Wait` when scripting completion. Tests create fictional databases, synthetic key files and isolated draft roots under the chosen output directory. Clipboard calls are replaced by an in-memory fake. They do not open your real vault, use your account-protection file, interact with your clipboard, or drive another password manager's UI. Do not pass a real vault path to diagnostics.
 
-The original 1.2 package passed 306 assertions; earlier follow-ups passed 329, 338 and 350. The current suite passes 385, plus two separate dependency-shadow startup checks. Each asynchronous UI workflow has a named 60-second limit so a missed decision fails instead of waiting indefinitely. Diagnostics require an explicitly isolated default draft root, including UI-created databases. Test output contains fictional plaintext and diagnostic exception details; keep it out of Git. See [FINAL-AUDIT.md](FINAL-AUDIT.md) for the latest reproduced gaps and fixes, [ADVERSARIAL-AUDIT.md](ADVERSARIAL-AUDIT.md) for the earlier review and [AUDIT.md](AUDIT.md) for the original scope.
+The original 1.2 package passed 306 assertions; earlier follow-ups passed 329, 338, 350 and 385. The current suite passes 411, plus two separate dependency-shadow startup checks. Each asynchronous UI workflow has a named 60-second limit so a missed decision fails instead of waiting indefinitely. Diagnostics require an explicitly isolated default draft root, including UI-created databases. Test output contains fictional plaintext and diagnostic exception details; keep it out of Git. See [FINAL-AUDIT.md](FINAL-AUDIT.md) for the latest reproduced security/preservation gaps and fixes, [ADVERSARIAL-AUDIT.md](ADVERSARIAL-AUDIT.md) for the earlier review and [AUDIT.md](AUDIT.md) for the original scope.
 
 ## Render synthetic previews
 
@@ -54,7 +54,7 @@ $image = Join-Path $results 'organizer.png'
 Start-Process -FilePath $exe -ArgumentList @('--render-demo', ('"' + $image + '"'), 'organizer') -WindowStyle Hidden -Wait
 ```
 
-Modes: `viewer`, `organizer`, `generator`, `gap`, `unlock`, `create`, `dual`, `recovery`, `reminder`, `open`, `settings`, `toast`, `compact`, `tooltip`, `dropdown`, `conflict`. These use in-process WPF rendering with fictional fixtures, without opening a real password-manager window. PNGs are 1280×820, with a 980×640 compact-layout preview. No screenshot of an unlocked real vault is necessary.
+Modes: `viewer`, `organizer`, `generator`, `gap`, `unlock`, `create`, `dual`, `recovery`, `reminder`, `open`, `settings`, `toast`, `compact`, `tooltip`, `dropdown`, `conflict`, `search`. These use in-process WPF rendering with fictional fixtures, without opening a real password-manager window. PNGs are 1280×820, with a 980×640 compact-layout preview. No screenshot of an unlocked real vault is necessary.
 
 ## Layout
 
@@ -62,13 +62,14 @@ Modes: `viewer`, `organizer`, `generator`, `gap`, `unlock`, `create`, `dual`, `r
 | --- | --- |
 | `src/KeePassHQ/App.cs`, `Features.cs` | Browsers, editing, reminders, modal/close/lock lifecycle |
 | `Presentation.cs`, `assets/bootstrap-icons/` | Embedded Bootstrap SVG paths, contextual tooltips, file-picker rows and safely cleared password reveal |
+| `Search.cs` | Per-browser transient search, literal matching/exclusions, result cards and folder navigation |
 | `DatabaseLifecycle.cs`, `FileIdentity.cs` | Create/open/close, per-pane ownership, same-file checks |
 | `Core.cs`, `Ordering.cs` | Sessions, encryption, save validation, backup, ordering/tree checks |
 | `Merge.cs`, `PendingMerge.cs` | Baseline reconciliation and preserved late versions |
 | `Drafts.cs` | Authenticated encrypted checkpoints and restart recovery |
 | `Transfers.cs` | Rich cloning, fresh UUIDs/references/icons, destination-first commits |
 | `Generator.cs`, `ClipboardService.cs` | Cryptographic generator and clipboard boundary |
-| `Tests.cs`, `Diagnostics.cs`, `TransferTests.cs`, `AuditTests.cs`, `PresentationTests.cs`, `FinalAuditTests.cs` | Diagnostics-only synthetic tests/rendering |
+| `Tests.cs`, `Diagnostics.cs`, `TransferTests.cs`, `AuditTests.cs`, `PresentationTests.cs`, `FinalAuditTests.cs`, `SearchTests.cs` | Diagnostics-only synthetic tests/rendering |
 | `scripts/check-source.ps1`, `validate.ps1` | Source/provenance checks and complete local/CI validation |
 | `Theme.xaml`, `Brand.png`, `KeePassHQ.ico` | Runtime theme and house-lock mark |
 | `third_party/` | Dependency notices, upstream matching source snapshot and acknowledgements |
