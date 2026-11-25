@@ -1,3 +1,21 @@
+Stable-column and Bootstrap icon follow-up — November 25, 2026
+Starting commit: bc22033506555c7f673eb57f7716558773efe1da
+
+PASS release/diagnostics builds and all 350 existing synthetic assertions.
+PASS fifteen fictional renders; inspected Viewer, Organizer, compact and Open
+     previews for steady column sizing, compact input actions and official icons.
+Columns use the same 280-pixel width in collapsed and expanded states.
+Field icons are 12 pixels in adjacent 22-pixel buttons; general icons stay 16.
+PASS original Bootstrap Icons 1.13.1 SVG inventory and SHA-256 checks; sources,
+     original viewBox/fill rules and MIT attribution are retained locally.
+PASS source inventory, documentation links, secret/personal-path patterns,
+     branding, corresponding KeePass source hash and embedded dependency checks.
+PASS release diagnostics exclusion and embedded dependency integrity
+Release SHA-256: D5ECF21BC9CB46520BF05E5DDDCBC21240F03C878D862C554B1BDD9EDAFB9402
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Previous UI completeness record (historical) ---
+
 UI completeness follow-up — November 25, 2026
 Starting commit: ffe0309b10a0609af23db269db5989432c00c25b
 

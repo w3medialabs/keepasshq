@@ -1,0 +1,3 @@
+# Preserve the exact upstream SVG/license bytes used by the icon hash manifest.
+assets/bootstrap-icons/*.svg -text
+assets/bootstrap-icons/LICENSE.txt -text

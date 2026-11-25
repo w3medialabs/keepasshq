@@ -6,6 +6,8 @@ Reviewed November 25, 2026 against UI refresh commit `ffe0309b10a0609af23db269db
 
 | Gap | Resolution and evidence |
 | --- | --- |
+| Expanding an entry widened its column and input actions dominated the row | Columns now keep a steady 280-pixel width. Field actions use 12-pixel icons in adjacent 22-pixel buttons. Reviewed normal and compact fictional renders; the existing editing, clipboard, generator and scrolling workflows continue to pass. |
+| Hand-drawn key and control icons were inconsistent | Use eighteen original Bootstrap Icons 1.13.1 SVGs embedded locally, including its standard horizontal key. Preserve path fill rules, viewBox, upstream sources, hashes and MIT attribution. |
 | Enter only worked from the original masked unlock field | Both representations now share submission handling. Synthetic routed Enter events unlock from the revealed main field and open modal, reject a mismatched confirmation, and create a correctly confirmed fictional database. |
 | Eye action could leave keyboard focus on the eye button | Explicit eye actions return focus to the corresponding editor; showing places its caret at the end. Programmatic clearing does not steal focus. |
 | Exiting with no loaded database skipped factor/clipboard cleanup | The direct exit path clears main/modal representations and attempts app-owned clipboard cleanup. A regression first failed against the original implementation; the fixed path clears owned text and preserves another app's replacement. |

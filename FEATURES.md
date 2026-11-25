@@ -12,7 +12,7 @@
 
 - Viewer has one pane. Organizer has equal left/right panes with the same controls and behavior.
 - Both start at the same root. Navigation is independent; the underlying session is shared until another database is opened.
-- Groups and entries appear together as title-only cards. Clicking a group adds its child column. Clicking an entry expands it in place.
+- Groups and entries appear together as title-only cards. Clicking a group adds its child column. Clicking an entry expands it in place without changing the column width.
 - Live name, username, password, URL and notes editing; visible passwords by design. Text actions are integrated into inputs. Notes support selection and extraction into manually created entries.
 - Create entries/groups at any visible level; rename a group through its context menu.
 - Green active groups, receiving gaps, hover-to-open groups and edge scrolling during drag.
@@ -20,7 +20,7 @@
 - Up to 40 local undo actions, with nearby field edits coalesced. Cross-database committed transfers clear undo.
 - Light theme, centered resizable window at startup, blue top-center notifications and shortcut actions.
 - Centered one/two-pane view switch, icon-only header actions, Settings at the far right, and styled descriptive tooltips.
-- Compact colored cards with folder/key icons, bordered white panels/columns, centered column captions, narrow scrollbars and full database paths under record counts.
+- Compact colored cards with official Bootstrap folder/key icons, bordered white panels/columns, centered column captions, narrow scrollbars and full database paths under record counts. Field actions use smaller, closely spaced Bootstrap icons.
 - Styled menus/dropdowns, labeled file-picker rows, and explicit show/hide controls for opening/creation passwords. Hidden/closed/locked password inputs clear their temporary revealed text.
 
 ## Two databases

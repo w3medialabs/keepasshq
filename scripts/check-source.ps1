@@ -41,4 +41,12 @@ if ((Get-FileHash -LiteralPath $mirror -Algorithm SHA256).Hash -ne 'E0E692D04B86
 foreach ($asset in @('Brand.png', 'KeePassHQ.ico')) {
     if ((Get-FileHash (Join-Path $root "assets/$asset")).Hash -ne (Get-FileHash (Join-Path $root "src/KeePassHQ/$asset")).Hash) { throw "Runtime branding differs from its public asset: $asset" }
 }
-Write-Output 'PASS source inventory, secret/path patterns, documentation links, upstream source hash and runtime branding'
+$iconRoot = Join-Path $root 'assets/bootstrap-icons'
+$iconNames = @()
+foreach ($line in Get-Content -LiteralPath (Join-Path $iconRoot 'SHA256SUMS.txt')) {
+    if ($line -notmatch '^([a-f0-9]{64})  ([a-z-]+\.svg)$') { throw 'Invalid Bootstrap icon hash entry' }
+    $expectedHash = $Matches[1]; $iconName = $Matches[2]; $iconNames += $iconName
+    if ((Get-FileHash -LiteralPath (Join-Path $iconRoot $iconName) -Algorithm SHA256).Hash -ne $expectedHash) { throw "Bootstrap icon hash mismatch: $iconName" }
+}
+if ($iconNames.Count -ne 18 -or (Compare-Object ($iconNames | Sort-Object -Unique) (Get-ChildItem -LiteralPath $iconRoot -Filter '*.svg' | Select-Object -ExpandProperty Name))) { throw 'Bootstrap SVG inventory differs from its eighteen pinned sources' }
+Write-Output 'PASS source inventory, secret/path patterns, documentation links, upstream source/icon hashes and runtime branding'

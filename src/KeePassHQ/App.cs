@@ -85,12 +85,17 @@ namespace VaultOrganizer
             UiVisual.Help(b, ButtonHelp(label));
             b.Click += (s, e) => { Activity(); action(); }; return b;
         }
-        private Button IconButton(string glyph, string tip, Action action)
+        private Button IconButton(string icon, string tip, Action action, double size = 16)
         {
-            var names = new Dictionary<string, string> { { "\uE7A7", "undo" }, { "\uE710", "add" }, { "\uE713", "settings" }, { "\uE8C6", "cut" }, { "\uE8C8", "copy" }, { "\uE77F", "paste" }, { "\uE8D7", "key" } };
-            string name; if (!names.TryGetValue(glyph, out name)) name = glyph;
-            var b = Button("", action, "Glyph"); b.Content = UiVisual.Icon(name); UiVisual.Help(b, tip);
+            var b = Button("", action, "Glyph"); b.Content = UiVisual.Icon(icon, null, size); UiVisual.Help(b, tip);
             System.Windows.Automation.AutomationProperties.SetName(b, tip); return b;
+        }
+        private Button FieldAction(string icon, string tip, Action action)
+        {
+            var button = IconButton(icon, tip, action, 12); button.Focusable = false;
+            button.Width = button.Height = button.MinWidth = button.MinHeight = 22;
+            button.Padding = new Thickness(4); button.Margin = new Thickness(0);
+            return button;
         }
         private static Border Rule() { return new Border { Background = Brush("#E1E7EE"), Width = 1, Margin = new Thickness(12, 0, 12, 0) }; }
         private void Activity() { lastActivityTicks = Stopwatch.GetTimestamp(); }
@@ -123,7 +128,7 @@ namespace VaultOrganizer
             viewerButton = IconButton("viewer", "Viewer · one card browser", () => SwitchMode(false)); organizerButton = IconButton("organizer", "Organizer · two independent card browsers", () => SwitchMode(true));
             viewerButton.Style = organizerButton.Style = (Style)Application.Current.FindResource("Segment"); modeButtons.Children.Add(viewerButton); modeButtons.Children.Add(organizerButton);
             var actions = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, VerticalAlignment = VerticalAlignment.Center, Margin = new Thickness(14, 0, 18, 0) };
-            undoButton = IconButton("\uE7A7", "Undo last change · Ctrl+Z", Undo); actions.Children.Add(undoButton);
+            undoButton = IconButton("undo", "Undo last change · Ctrl+Z", Undo); actions.Children.Add(undoButton);
             var saveButton = IconButton("save", "Save · publish pending edits in all loaded databases · Ctrl+S", async () => { await SaveNow(true); }); saveButton.Style = (Style)Application.Current.FindResource("Primary"); saveButton.Padding = new Thickness(10); actions.Children.Add(saveButton);
             recoveryButton = IconButton("recovery", "Save recovery copy · write your working edits to a new encrypted file and close loaded databases", async () => { await Recovery(); }); recoveryButton.Visibility = Visibility.Collapsed; actions.Children.Add(recoveryButton);
             actions.Children.Add(Rule());
@@ -264,15 +269,14 @@ namespace VaultOrganizer
             for (int depth = 0; depth < pane.Path.Count; ++depth)
             {
                 int columnDepth = depth; PwGroup current = pane.Path[depth];
-                bool expanded = current.Entries.Any(e => e.Uuid.ToHexString() == pane.Expanded);
-                var column = new Grid { Width = expanded ? 360 : 190, Margin = new Thickness(0, 0, 8, 0), Background = Brushes.White };
+                var column = new Grid { Width = 280, Margin = new Thickness(0, 0, 8, 0), Background = Brushes.White };
                 column.RowDefinitions.Add(new RowDefinition { Height = new GridLength(36) }); column.RowDefinitions.Add(new RowDefinition());
                 var columnFrame = new Border { BorderBrush = Brush("#E1E7F0"), BorderThickness = new Thickness(1), CornerRadius = new CornerRadius(7), IsHitTestVisible = false }; Grid.SetRowSpan(columnFrame, 2); column.Children.Add(columnFrame);
                 var header = new Grid { Margin = new Thickness(11, 0, 7, 0) };
                 header.ColumnDefinitions.Add(new ColumnDefinition()); header.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
                 var caption = Text(depth == 0 ? "TOP LEVEL" : current.Name.ToUpperInvariant(), 10, "#8390A3"); caption.FontWeight = FontWeights.SemiBold; caption.TextTrimming = TextTrimming.CharacterEllipsis; caption.ToolTip = current.Name;
                 caption.TextAlignment = TextAlignment.Center; caption.HorizontalAlignment = HorizontalAlignment.Stretch; caption.Margin = new Thickness(24, 0, 24, 0); Grid.SetColumnSpan(caption, 2); header.Children.Add(caption);
-                var add = IconButton("\uE710", "Create in " + current.Name, () => { });
+                var add = IconButton("add", "Create in " + current.Name, () => { });
                 var menu = new ContextMenu();
                 var newGroup = new MenuItem { Header = "New group" }; newGroup.Click += (s, e) => PromptName("New group", "Group name", value => { var g = pane.Session.NewGroup(current, value); Push("Create group", () => { current.Groups.Remove(g); pane.Session.Database.DeletedObjects.Add(new PwDeletedObject(g.Uuid, DateTime.UtcNow)); pane.Session.Changed(); }); RenderAll(); Toast("Group created.", false); });
                 var newEntry = new MenuItem { Header = "New entry" }; newEntry.Click += (s, e) => AddEntry(pane, current);
@@ -364,12 +368,11 @@ namespace VaultOrganizer
                 pane.Session.Set(entry, field, input.Text); lastFieldEditTicks = Stopwatch.GetTimestamp(); Activity(); SyncField(input, entry, field); SetStatus();
                 if (field == PwDefs.TitleField) RefreshNames(entry);
             };
-            var tools = new StackPanel { Background = Brushes.Transparent, Orientation = multiline ? Orientation.Vertical : Orientation.Horizontal, VerticalAlignment = multiline ? VerticalAlignment.Top : VerticalAlignment.Stretch, Margin = new Thickness(0) };
-            var cut = IconButton("\uE8C6", "Cut selected text, or the whole field", () => ClipboardAction(input, "cut"));
-            var copy = IconButton("\uE8C8", "Copy selected text, or the whole field", () => ClipboardAction(input, "copy"));
-            var paste = IconButton("\uE77F", "Paste at the cursor", () => ClipboardAction(input, "paste"));
-            foreach (Button button in new[] { cut, copy, paste }) { button.Focusable = false; button.MinHeight = 28; tools.Children.Add(button); }
-            if (field == PwDefs.PasswordField) { var generate = IconButton("\uE8D7", "Generate password", () => ShowGenerator(input)); generate.Focusable = false; generate.MinHeight = 28; tools.Children.Add(generate); }
+            var tools = new StackPanel { Background = Brushes.Transparent, Orientation = multiline ? Orientation.Vertical : Orientation.Horizontal, VerticalAlignment = multiline ? VerticalAlignment.Top : VerticalAlignment.Center, Margin = new Thickness(0, 3, 3, 3) };
+            tools.Children.Add(FieldAction("cut", "Cut selected text, or the whole field", () => ClipboardAction(input, "cut")));
+            tools.Children.Add(FieldAction("copy", "Copy selected text, or the whole field", () => ClipboardAction(input, "copy")));
+            tools.Children.Add(FieldAction("paste", "Paste at the cursor", () => ClipboardAction(input, "paste")));
+            if (field == PwDefs.PasswordField) tools.Children.Add(FieldAction("key", "Generate password", () => ShowGenerator(input)));
             Grid.SetColumn(tools, 1); row.Children.Add(tools); fields.Children.Add(frame);
         }
         private void ClipboardAction(TextBox input, string action)

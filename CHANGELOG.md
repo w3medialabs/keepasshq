@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Keep browser columns at a steady width when entries expand; shrink and tighten input actions. Replace hand-drawn control/card symbols with locally embedded Bootstrap Icons 1.13.1 SVGs, preserving original geometry, source and MIT attribution.
 - UI completeness follow-up: restore Enter submission and editor focus for revealed passwords, clear empty-session factors/app-owned clipboard on exit, add option help, and keep entry help/accessibility labels current after renaming.
 - Verify custom scrollbar thumb/page routing and real dropdown option selection; expand synthetic validation to 350 assertions and fifteen rendered previews, including the actual dropdown popup template.
 - Add `package.ps1` for a repeatable local portable deployment built from an isolated commit archive, with optional verified fictional demo, corresponding source, licenses, validation summaries and payload/checksum verification.

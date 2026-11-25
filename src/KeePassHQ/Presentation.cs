@@ -1,43 +1,56 @@
 using System;
 using System.Collections.Generic;
+using System.Reflection;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Data;
 using System.Windows.Input;
 using System.Windows.Media;
 using System.Windows.Shapes;
+using System.Xml;
 
 namespace VaultOrganizer
 {
     internal static class UiVisual
     {
-        private static readonly Dictionary<string, string> Shapes = new Dictionary<string, string> {
-            { "folder", "M1,5 L1,13 L15,13 L15,5 Z M1,5 L1,3 L6,3 L8,5" },
-            { "key", "M9,3 A4,4 0 1 1 9,11 A4,4 0 1 1 9,3 M6,10 L1,15 M2,14 L2,11 M4,12 L4,9" },
-            { "save", "M2,1 L12,1 L15,4 L15,15 L1,15 L1,1 Z M4,1 L4,6 L11,6 L11,1 M4,15 L4,10 L12,10 L12,15" },
-            { "undo", "M6,3 L2,7 L6,11 M2,7 L10,7 Q15,7 15,12" },
-            { "close", "M4,4 L12,12 M12,4 L4,12" },
-            { "lock", "M4,7 L4,5 A4,4 0 0 1 12,5 L12,7 M3,7 L13,7 L13,15 L3,15 Z M8,10 L8,12" },
-            { "settings", "M6,1 L10,1 L10.5,3 L12,4 L14,3.5 L16,7 L14.5,8 L14,10 L15,11.5 L12,14.5 L10.5,13.5 L9,14 L8,16 L4.5,14.5 L4.5,12.5 L3,11.5 L1,12 L0,8.5 L1.5,7 L2,5.5 L1.5,3.5 L5,2 L6,1 Z M8,5 A3,3 0 1 1 8,11 A3,3 0 1 1 8,5" },
-            { "eye", "M1,8 Q8,-1 15,8 Q8,17 1,8 Z M8,5.5 A2.5,2.5 0 1 1 8,10.5 A2.5,2.5 0 1 1 8,5.5" },
-            { "eye-off", "M1,8 Q8,-1 15,8 Q8,17 1,8 M2,2 L14,14" },
-            { "viewer", "M2,2 L14,2 L14,14 L2,14 Z M5,5 L11,5 M5,8 L11,8 M5,11 L9,11" },
-            { "organizer", "M1,2 L7,2 L7,14 L1,14 Z M10,2 L16,2 L16,14 L10,14 Z" },
-            { "recovery", "M3,1 L10,1 L14,5 L14,15 L3,15 Z M10,1 L10,5 L14,5 M6,10 L11,10 M8.5,7.5 L8.5,12.5" },
-            { "add", "M8,2 L8,14 M2,8 L14,8" },
-            { "copy", "M5,5 L14,5 L14,15 L5,15 Z M11,2 L2,2 L2,12" },
-            { "paste", "M5,3 L2,3 L2,15 L14,15 L14,3 L11,3 M5,1 L11,1 L11,5 L5,5 Z" },
-            { "cut", "M6,11 L13,2 M6,5 L13,14 M3,2 A2.5,2.5 0 1 1 3,7 A2.5,2.5 0 1 1 3,2 M3,10 A2.5,2.5 0 1 1 3,15 A2.5,2.5 0 1 1 3,10" },
-            { "chevron", "M4,6 L8,10 L12,6" },
-            { "info", "M8,1 A7,7 0 1 1 8,15 A7,7 0 1 1 8,1 M8,7 L8,11 M8,4 L8,4.2" }
+        // Unmodified Bootstrap Icons 1.13.1 SVGs are embedded, never fetched at runtime.
+        // Preserve each path's fill rule and the full 16x16 viewBox (including whitespace).
+        private static readonly Dictionary<string, string> IconNames = new Dictionary<string, string> {
+            { "folder", "folder" }, { "key", "key" }, { "save", "floppy" },
+            { "undo", "arrow-counterclockwise" }, { "close", "x-lg" }, { "lock", "lock" },
+            { "settings", "gear" }, { "eye", "eye" }, { "eye-off", "eye-slash" },
+            { "viewer", "view-list" }, { "organizer", "layout-split" }, { "recovery", "file-earmark-plus" },
+            { "add", "plus-lg" }, { "copy", "copy" }, { "paste", "clipboard" },
+            { "cut", "scissors" }, { "chevron", "chevron-down" }, { "info", "info-circle" }
         };
-        internal static FrameworkElement Icon(string name, string color = null)
+        private static readonly Dictionary<string, Geometry[]> IconGeometry = new Dictionary<string, Geometry[]>();
+        internal static FrameworkElement Icon(string name, string color = null, double size = 16)
         {
-            string geometry; if (!Shapes.TryGetValue(name, out geometry)) geometry = Shapes["info"];
-            var path = new Path { Data = Geometry.Parse(geometry), Width = 16, Height = 16, Stretch = Stretch.Uniform, StrokeThickness = 1.5, StrokeStartLineCap = PenLineCap.Round, StrokeEndLineCap = PenLineCap.Round, StrokeLineJoin = PenLineJoin.Round };
-            if (color == null) path.SetBinding(Shape.StrokeProperty, new Binding("Foreground") { RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(Control), 1) });
-            else path.Stroke = (Brush)new BrushConverter().ConvertFromString(color);
-            return path;
+            string resource; if (!IconNames.TryGetValue(name, out resource)) resource = IconNames["info"];
+            Geometry[] geometries;
+            if (!IconGeometry.TryGetValue(resource, out geometries))
+            {
+                var document = new XmlDocument { XmlResolver = null };
+                using (var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream("Bootstrap." + resource + ".svg"))
+                using (var reader = XmlReader.Create(stream, new XmlReaderSettings { DtdProcessing = DtdProcessing.Prohibit, XmlResolver = null })) document.Load(reader);
+                var paths = new List<Geometry>();
+                foreach (XmlNode node in document.DocumentElement.ChildNodes)
+                {
+                    var element = node as XmlElement; if (element == null || element.LocalName != "path") continue;
+                    var geometry = Geometry.Parse((element.GetAttribute("fill-rule") == "evenodd" ? "F0 " : "F1 ") + element.GetAttribute("d"));
+                    geometry.Freeze(); paths.Add(geometry);
+                }
+                geometries = paths.ToArray(); IconGeometry.Add(resource, geometries);
+            }
+            var canvas = new Canvas { Width = 16, Height = 16, IsHitTestVisible = false };
+            foreach (var geometry in geometries)
+            {
+                var path = new Path { Data = geometry };
+                if (color == null) path.SetBinding(Shape.FillProperty, new Binding("Foreground") { RelativeSource = new RelativeSource(RelativeSourceMode.FindAncestor, typeof(Control), 1) });
+                else path.Fill = (Brush)new BrushConverter().ConvertFromString(color);
+                canvas.Children.Add(path);
+            }
+            return new Viewbox { Width = size, Height = size, Child = canvas };
         }
         internal static void Help(FrameworkElement element, string text)
         {

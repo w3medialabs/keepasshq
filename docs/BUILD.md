@@ -28,7 +28,7 @@ Recommended complete check, from any working directory:
 powershell -NoProfile -File .\validate.ps1 -Render
 ```
 
-Use the full path to `validate.ps1` when outside the checkout. The script checks source inventory, secret/personal-path patterns, Markdown links, corresponding upstream source hash and branding assets; builds both variants; verifies release diagnostics exclusion and the embedded dependency hash; runs the suite; and optionally renders all fifteen previews. Omit `-Render` for the same checks without previews. Summaries and generated fictional data stay under ignored `test-output/`; build output stays under `bin/` and `bin-diagnostics/`.
+Use the full path to `validate.ps1` when outside the checkout. The script checks source inventory, secret/personal-path patterns, Markdown links, corresponding upstream source hash, bundled Bootstrap SVG hashes and branding assets; builds both variants; verifies release diagnostics exclusion and the embedded dependency hash; runs the suite; and optionally renders all fifteen previews. Omit `-Render` for the same checks without previews. Summaries and generated fictional data stay under ignored `test-output/`; build output stays under `bin/` and `bin-diagnostics/`.
 
 Run `powershell -NoProfile -File .\scripts\check-source.ps1` for source checks alone. Git checkouts inspect tracked and unignored files; extracted archives inspect the documented source directories. Pattern checks support manual review and do not establish that arbitrary content is free of secrets.
 
@@ -61,7 +61,7 @@ Modes: `viewer`, `organizer`, `generator`, `gap`, `unlock`, `create`, `dual`, `r
 | Path | Purpose |
 | --- | --- |
 | `src/KeePassHQ/App.cs`, `Features.cs` | Browsers, editing, reminders, modal/close/lock lifecycle |
-| `Presentation.cs` | Vector UI icons, contextual tooltips, file-picker rows and safely cleared password reveal |
+| `Presentation.cs`, `assets/bootstrap-icons/` | Embedded Bootstrap SVG paths, contextual tooltips, file-picker rows and safely cleared password reveal |
 | `DatabaseLifecycle.cs`, `FileIdentity.cs` | Create/open/close, per-pane ownership, same-file checks |
 | `Core.cs`, `Ordering.cs` | Sessions, encryption, save validation, backup, ordering/tree checks |
 | `Merge.cs`, `PendingMerge.cs` | Baseline reconciliation and preserved late versions |
