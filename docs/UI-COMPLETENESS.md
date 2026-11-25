@@ -12,7 +12,7 @@ Reviewed November 25, 2026 against UI refresh commit `ffe0309b10a0609af23db269db
 | Dropdown options lacked contextual help | Settings options describe seconds/minutes and the effect of their value. Tests generate the actual popup's item containers, select a real option, and verify its help. |
 | Editing an entry name left stale header help/accessibility labels | Live name updates now update those labels alongside the visible title. |
 | Custom scrolling and dropdowns had render evidence but little direct interaction evidence | Synthetic thumb-drag and page commands verify horizontal/vertical viewport movement, value synchronization and narrow dimensions. The dropdown preview renders its actual popup template without showing a native window. |
-| Local deployment was a sequence of temporary packaging commands | `package.ps1` builds and validates an immutable commit archive, optionally generates/read-verifies a fictional demo, preserves existing deployments, and verifies package inventory, payload hashes and relative checksum paths. |
+| Local deployment was a sequence of temporary packaging commands | `package.ps1` builds and validates an immutable commit archive, optionally generates/read-verifies a fictional demo, preserves existing deployments, writes standard forward-slash ZIP paths across PowerShell versions, and verifies package inventory, payload hashes and relative checksum paths. |
 | Extracted-source checks could skip nested files when the archive was placed beneath an ignored output directory | Filter generated directories relative to the extracted source root. A deliberately broken nested documentation link is rejected inside an extracted archive under `test-output`; the clean archive passes. |
 
 ## Completeness and validation

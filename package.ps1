@@ -37,11 +37,17 @@ try {
     if ($Demo) { $info += 'Demo.kdbx is fictional. Password: demo. Never store real credentials in it.' }
     $info | Set-Content -LiteralPath (Join-Path $app 'BUILD-INFO.txt') -Encoding UTF8
     $portable = Join-Path $destination 'KeePassHQ-1.2-preview-portable.zip'
-    Compress-Archive -LiteralPath $app -DestinationPath $portable
+    Add-Type -AssemblyName System.IO.Compression.FileSystem
+    $archive = [IO.Compression.ZipFile]::Open($portable,[IO.Compression.ZipArchiveMode]::Create)
+    try {
+        foreach ($file in Get-ChildItem -LiteralPath $app -Recurse -Force -File) {
+            $relative = 'KeePassHQ/' + $file.FullName.Substring($app.Length + 1).Replace('\','/')
+            [void][IO.Compression.ZipFileExtensions]::CreateEntryFromFile($archive,$file.FullName,$relative,[IO.Compression.CompressionLevel]::Optimal)
+        }
+    } finally { $archive.Dispose() }
     @('KeePassHQ/KeePassHQ.exe','KeePassHQ-1.2-preview-portable.zip','KeePassHQ-source.zip') | ForEach-Object {
         (Get-FileHash -LiteralPath (Join-Path $destination $_) -Algorithm SHA256).Hash + '  ' + $_
     } | Set-Content -LiteralPath (Join-Path $destination 'SHA256SUMS.txt') -Encoding ASCII
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
     $zip = [IO.Compression.ZipFile]::OpenRead($portable)
     try {
         $names = @($zip.Entries | ForEach-Object FullName)
