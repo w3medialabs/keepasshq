@@ -44,6 +44,7 @@ Use a disposable copy first. Passwords are deliberately visible while entries ar
 | [Security policy](SECURITY.md) | Threat boundaries and private reporting |
 | [Development audit](docs/AUDIT.md) | Findings, corrections, tests and remaining limits |
 | [Architecture](docs/ARCHITECTURE.md) | Sessions, storage, merge and transfer protocol |
+| [Design choices](docs/THEORY.md) | Browser model, private edits, preservation and narrow runtime |
 | [Contributing](CONTRIBUTING.md) | Small changes, synthetic fixtures and review expectations |
 | [Release checklist](docs/RELEASING.md) | Publishing a public repository and reproducible checks |
 | [Changelog](CHANGELOG.md) | Version history |

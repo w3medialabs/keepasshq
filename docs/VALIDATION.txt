@@ -17,6 +17,17 @@ PASS staged inventory reviewed for secret patterns, personal paths and runtime
 PASS bundled KeePass Authenticode status Valid, signer Dominik Reichl.
 PASS canonical W3ML authority matches installed version 1.2; its file revision
      remains 811870ae4e95f3f939cffb68aa991639ffff74d3.
+PASS initial source commit pushed normally to public main:
+     2dfe6b474df47470bf2316a48cecea2e3f07d210.
+
+Hosted-service limitations at repository setup:
+- GitHub API returned HTTP 500 for workflow dispatch; no hosted CI run exists.
+  The identical Windows PowerShell command passed locally and from the archive.
+- GitHub API returned HTTP 500 enabling private vulnerability reporting; its
+  readback remains disabled. SECURITY.md provides a confidential-channel request
+  fallback without public exploit details. Enable reporting before binary release.
+- Browser access host was unavailable, preventing a web-interface fallback.
+  These failures do not affect the verified Git push or local build/test evidence.
 
 The application C# source, pinned dependency, legacy draft paths and metadata
 identifiers are unchanged by this migration. The build script now resolves
