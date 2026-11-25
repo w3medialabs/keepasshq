@@ -91,7 +91,7 @@ namespace VaultOrganizer
         {
             if (opening || sealing || transferring || changingDatabase || saveTask != null) return;
             var menu = new ContextMenu();
-            Action<string, Action> add = (label, action) => { var item = new MenuItem { Header = label }; item.Click += (s, e) => action(); menu.Items.Add(item); };
+            Action<string, Action> add = (label, action) => { var item = new MenuItem { Header = label }; UiVisual.Help(item, label.StartsWith("Save recovery") ? "Save working edits to a new encrypted database without overwriting the original, then close loaded databases." : label); item.Click += (s, e) => action(); menu.Items.Add(item); };
             add("Open database…", () => DatabaseDialog(pane, false));
             add("Create database…", () => DatabaseDialog(pane, true));
             if (otherSession != null) add("Use other pane's database", async () => { await ClosePane(pane); });
@@ -141,24 +141,24 @@ namespace VaultOrganizer
             if (opening || sealing || transferring || protectionFailure || saveTask != null) return;
             int side = pane == null ? -1 : panes.IndexOf(pane);
             var body = new StackPanel();
-            var location = new TextBox { IsReadOnly = true, Margin = new Thickness(0, 0, 0, 9) };
-            body.Children.Add(location);
-            body.Children.Add(Button("Choose " + (create ? "new filename…" : "database…"), () =>
+            body.Children.Add(Text(create ? "NEW DATABASE FILE" : "DATABASE FILE", 10, "#7D8A9E"));
+            var location = new TextBox { IsReadOnly = true, Text = create ? "Choose a new .kdbx filename" : "Choose a .kdbx database", Foreground = Brush("#7D8A9E") };
+            body.Children.Add(FilePickerRow(location, create ? "Choose an unused filename for the new database." : "Browse to the database you want to open in this pane.", () =>
             {
                 if (create) { var picker = new SaveFileDialog { Filter = "KeePass database|*.kdbx", AddExtension = true, DefaultExt = ".kdbx", OverwritePrompt = true }; if (picker.ShowDialog(this) == true) location.Text = picker.FileName; }
                 else { var picker = new OpenFileDialog { Filter = "KeePass database|*.kdbx", CheckFileExists = true }; if (picker.ShowDialog(this) == true) location.Text = picker.FileName; }
-            }, "Quiet"));
+            }));
             var use = new CheckBox { Content = "Use master password", IsChecked = true, Margin = new Thickness(0, 13, 0, 4) }; body.Children.Add(use);
-            var secret = new PasswordBox(); body.Children.Add(secret);
-            var confirm = new PasswordBox { Margin = new Thickness(0, 6, 0, 0) };
-            if (create) { body.Children.Add(Text("CONFIRM PASSWORD", 10, "#7D8A9E")); body.Children.Add(confirm); }
+            var secret = new PasswordBox(); body.Children.Add(SecretField(secret, "Master password"));
+            var confirm = new PasswordBox();
+            if (create) { var caption = Text("CONFIRM PASSWORD", 10, "#7D8A9E"); caption.Margin = new Thickness(0, 12, 0, 5); body.Children.Add(caption); body.Children.Add(SecretField(confirm, "Confirm master password")); }
             use.Unchecked += (s, e) => { secret.Clear(); confirm.Clear(); secret.IsEnabled = confirm.IsEnabled = false; }; use.Checked += (s, e) => { secret.IsEnabled = confirm.IsEnabled = true; };
-            var keyFile = new TextBox { IsReadOnly = true, Margin = new Thickness(0, 6, 0, 0) };
+            var keyFile = new TextBox { IsReadOnly = true };
             var advanced = new Expander { Header = "Existing key file / Windows account", Margin = new Thickness(0, 12, 0, 0) }; var keys = new StackPanel(); advanced.Content = keys;
-            keys.Children.Add(keyFile); keys.Children.Add(Button("Choose key file…", () => { var picker = new OpenFileDialog { Filter = "Key files|*.keyx;*.key|All files|*.*" }; if (picker.ShowDialog(this) == true) keyFile.Text = picker.FileName; }, "Quiet"));
+            keys.Children.Add(FilePickerRow(keyFile, "Choose an existing key file required by this database.", () => { var picker = new OpenFileDialog { Filter = "Key files|*.keyx;*.key|All files|*.*" }; if (picker.ShowDialog(this) == true) keyFile.Text = picker.FileName; }));
             keys.Children.Add(Button("Clear key file", () => keyFile.Clear(), "Quiet"));
             var account = new CheckBox { Content = "Use Windows account key" }; keys.Children.Add(account); body.Children.Add(advanced);
-            var hint = Text(create ? "New databases use Argon2id (64 MiB, 3 passes) and AES-256. Existing files are never overwritten." : "The database is decrypted only on this computer. Each file keeps its own key and encrypted drafts.", 12, "#7D8A9E"); hint.TextWrapping = TextWrapping.Wrap; hint.Margin = new Thickness(0, 12, 0, 8); body.Children.Add(hint);
+            var hint = Text(create ? "Your new database starts empty. Existing files are never overwritten." : "Each database can use its own master password and key file. Everything stays on this computer.", 12, "#7D8A9E"); hint.TextWrapping = TextWrapping.Wrap; hint.Margin = new Thickness(0, 12, 0, 16); body.Children.Add(hint);
             var row = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right };
             row.Children.Add(Button("Cancel", CloseModal, "Quiet"));
             row.Children.Add(Button(create ? "Create & open" : "Open", async () =>
@@ -197,7 +197,7 @@ namespace VaultOrganizer
                     else if (lockAfterOpen) { lockAfterOpen = false; var queued = Dispatcher.BeginInvoke(new Action(async () => { await Seal(false); })); }
                 }
             }, "Primary"));
-            body.Children.Add(row); Dialog(create ? "Create database" : "Open database", body).Width = 500;
+            body.Children.Add(row); Dialog(create ? "Create database" : "Open database", body).Width = 520;
         }
         private async Task OfferPaneDraft(VaultSession working)
         {

@@ -42,7 +42,10 @@ namespace VaultOrganizer
                 var window = new OrganizerWindow();
 #if DIAGNOSTICS
                 if (args.Length >= 2 && args[0] == "--render-demo")
-                { window.RenderDemo(args[1], args.Length > 2 ? args[2] : "cards"); return 0; }
+                {
+                    try { window.RenderDemo(args[1], args.Length > 2 ? args[2] : "cards"); return 0; }
+                    catch (Exception ex) { File.WriteAllText(args[1] + ".error.txt", ex.ToString()); return 2; }
+                }
 #endif
                 app.DispatcherUnhandledException += (sender, e) => { e.Handled = true; window.ReportUnexpectedError(); };
                 app.Run(window); return 0;

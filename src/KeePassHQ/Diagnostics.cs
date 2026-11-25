@@ -122,6 +122,7 @@ namespace VaultOrganizer
         internal void RenderDemo(string destination, string mode)
         {
             rendering = true; heartbeat.Stop(); clipboard = new IsolatedClipboard();
+            int width = mode == "compact" ? 980 : 1280, height = mode == "compact" ? 640 : 820; Width = width; Height = height;
             VaultSession.IsolatedDraftRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "render-drafts-" + Guid.NewGuid().ToString("N"));
             if (mode != "unlock" && mode != "create")
             {
@@ -133,6 +134,9 @@ namespace VaultOrganizer
                 saveStatus.Text="Unsaved changes · encrypted draft protected · Ctrl+S to publish";
                 if(mode=="generator")ShowGenerator(FieldBox(panes[0],imports.Entries.First(),PwDefs.PasswordField));
                 if(mode=="recovery") { var decision = AskPreviousCheckpoint(); }
+                if(mode=="settings")ShowSettings();
+                if(mode=="open")DatabaseDialog(panes[1],false);
+                if(mode=="toast")Toast("Changes saved. Both databases are up to date.",false);
                 if(mode=="reminder") { dirtyTicks=Stopwatch.GetTimestamp()-240*Stopwatch.Frequency;lastNudgeTicks=lastStrongTicks=0;NudgeSave();SetStatus(); }
                 if(mode=="gap"){var gap=panes[1].Columns.Children.OfType<Grid>().Last();var receive=Descendants<Border>(gap).First(b=>b.AllowDrop&&b.Height==7);receive.Height=45;receive.Background=Brush("#DDF2E5");receive.BorderBrush=Brush("#8DBDA0");receive.BorderThickness=new Thickness(1);}
                 if(mode=="dual")
@@ -144,8 +148,16 @@ namespace VaultOrganizer
                 }
             }
             if(mode=="create")DatabaseDialog(null,true);
-            var content=(FrameworkElement)Content;content.Width=1600;content.Height=1000;content.Measure(new Size(1600,1000));content.Arrange(new Rect(0,0,1600,1000));content.UpdateLayout();
-            var bitmap=new RenderTargetBitmap(1600,1000,96,96,PixelFormats.Pbgra32);bitmap.Render(content);
+            var content=(FrameworkElement)Content;content.Width=width;content.Height=height;content.Measure(new Size(width,height));content.Arrange(new Rect(0,0,width,height));content.UpdateLayout();
+            var bitmap=new RenderTargetBitmap(width,height,96,96,PixelFormats.Pbgra32);bitmap.Render(content);
+            if(mode=="tooltip")
+            {
+                var previewTip=new ToolTip { Content="Save · publish pending edits in all loaded databases · Ctrl+S",Style=(Style)Application.Current.FindResource(typeof(ToolTip)),Visibility=Visibility.Visible };
+                previewTip.Measure(new Size(300,Double.PositiveInfinity));previewTip.Arrange(new Rect(new Point(),previewTip.DesiredSize));previewTip.UpdateLayout();
+                int tipWidth=(int)Math.Ceiling(previewTip.ActualWidth),tipHeight=(int)Math.Ceiling(previewTip.ActualHeight);
+                var tipBitmap=new RenderTargetBitmap(tipWidth,tipHeight,96,96,PixelFormats.Pbgra32);tipBitmap.Render(previewTip);
+                var overlay=new DrawingVisual();using(var drawing=overlay.RenderOpen())drawing.DrawImage(tipBitmap,new Rect(width-tipWidth-100,70,tipWidth,tipHeight));bitmap.Render(overlay);
+            }
             using(var stream=new FileStream(destination,FileMode.Create)){var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));encoder.Save(stream);}
             foreach(var working in LoadedSessions)working.Dispose();session=otherSession=null;StopTimers();SystemEvents.SessionSwitch-=OnSystemSession;
         }

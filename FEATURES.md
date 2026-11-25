@@ -18,7 +18,10 @@
 - Green active groups, receiving gaps, hover-to-open groups and edge scrolling during drag.
 - Move and reorder in either direction, including within a column; invalid cycles/root moves are rejected.
 - Up to 40 local undo actions, with nearby field edits coalesced. Cross-database committed transfers clear undo.
-- Light theme, maximized startup, top-center notifications and shortcut actions.
+- Light theme, centered resizable window at startup, blue top-center notifications and shortcut actions.
+- Centered one/two-pane view switch, icon-only header actions, Settings at the far right, and styled descriptive tooltips.
+- Compact colored cards with folder/key icons, bordered white panels/columns, centered column captions, narrow scrollbars and full database paths under record counts.
+- Styled menus/dropdowns, labeled file-picker rows, and explicit show/hide controls for opening/creation passwords. Hidden/closed/locked password inputs clear their temporary revealed text.
 
 ## Two databases
 

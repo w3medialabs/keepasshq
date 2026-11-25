@@ -1,3 +1,26 @@
+UI refresh validation — November 25, 2026
+
+PASS release and diagnostics builds without compiler warnings.
+PASS 338 synthetic assertions, including nine password-reveal security regressions.
+PASS explicit reveal/hide synchronization; temporary plaintext clears on hide,
+     factor disable, dialog close, lock and successful decryption. Clipboard remains isolated.
+PASS fourteen fictional previews at 1280x820, plus compact layout at 980x640.
+     Inspected the normal and compact browsers, dialogs, Settings, generator,
+     dual-database paths, blue notification and actual styled tooltip template.
+PASS source inventory, local documentation links, secret/personal-path patterns,
+     corresponding dependency source hash and branding consistency.
+PASS release excludes diagnostics, render modes, isolated defaults and fault hooks.
+
+The application now starts as a centered resizable window. Header actions,
+menus, tooltips, input rows, scrollbars and browser borders share one style.
+Public preview paths are fictional Examples paths; real databases, key factors,
+account-protection files and the user's clipboard were not accessed.
+PASS release diagnostics exclusion and embedded dependency integrity
+Release SHA-256: 164599D580C15E8CB515685A71EAAB8AF37203B5AC18B7AC514BF5EBF8025B15
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Adversarial follow-up record (historical) ---
+
 Adversarial follow-up validation — November 25, 2026
 Repository: https://github.com/w3medialabs/keepasshq
 Starting source commit: 37edbe9540f58aceebd6beb7d741b4291828e078

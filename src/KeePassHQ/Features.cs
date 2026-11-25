@@ -42,7 +42,7 @@ namespace VaultOrganizer
                 if (organize && panes[1].Columns.Children.Count == 0) RenderPane(panes[1]);
                 if (!organize) { panes[1].Columns.Children.Clear(); panes[1].Editors.Clear(); panes[1].EntryHeaders.Clear(); }
             }
-            if (viewerButton != null) { viewerButton.Background = Brush(organize ? "#FFFFFF" : "#E8F0FC"); organizerButton.Background = Brush(organize ? "#E8F0FC" : "#FFFFFF"); }
+            if (viewerButton != null) { viewerButton.Background = organize ? Brushes.Transparent : Brushes.White; organizerButton.Background = organize ? Brushes.White : Brushes.Transparent; viewerButton.Foreground = Brush(organize ? "#7D8A9E" : "#396BD7"); organizerButton.Foreground = Brush(organize ? "#396BD7" : "#7D8A9E"); viewerButton.BorderBrush = organize ? Brushes.Transparent : Brush("#D6E3F6"); organizerButton.BorderBrush = organize ? Brush("#D6E3F6") : Brushes.Transparent; }
             Activity();
         }
         private void UpdateInteraction()
@@ -133,10 +133,13 @@ namespace VaultOrganizer
             var digits = new CheckBox { Content = "0–9", IsChecked = true, Margin = new Thickness(0, 0, 17, 0) };
             var symbols = new CheckBox { Content = "Symbols", IsChecked = true };
             foreach (var option in new[] { upper, lower, digits, symbols }) rules.Children.Add(option);
+            UiVisual.Help(upper, "Include uppercase letters."); UiVisual.Help(lower, "Include lowercase letters."); UiVisual.Help(digits, "Include digits."); UiVisual.Help(symbols, "Include symbols.");
             body.Children.Add(Text("LENGTH", 10, "#7D8A9E"));
             var length = new TextBox { Text = "24", Margin = new Thickness(0, 7, 0, 17), MaxLength = 3 }; body.Children.Add(length); body.Children.Add(rules);
+            UiVisual.Help(length, "Generated password length, from 8 to 128 characters.");
             var output = new TextBox { IsReadOnly = true, TextWrapping = TextWrapping.Wrap, Margin = new Thickness(0, 18, 0, 7), FontFamily = new FontFamily("Consolas"), FontSize = 16, MinHeight = 55 };
             body.Children.Add(output);
+            UiVisual.Help(output, "Generated password. Use fills the calling field; Copy writes to the clipboard.");
             var buttons = new Grid { Margin = new Thickness(0, 20, 0, 0) }; buttons.ColumnDefinitions.Add(new ColumnDefinition()); buttons.ColumnDefinitions.Add(new ColumnDefinition { Width = GridLength.Auto });
             var cancel = Button("Cancel", CloseModal, "Quiet"); cancel.HorizontalAlignment = HorizontalAlignment.Left; buttons.Children.Add(cancel);
             var right = new StackPanel { Orientation = Orientation.Horizontal }; Grid.SetColumn(right, 1); buttons.Children.Add(right);

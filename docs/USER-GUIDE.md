@@ -8,7 +8,11 @@ Obtain the portable archive from [GitHub Releases](https://github.com/w3medialab
 
 Portable packages may include a fictional Demo.kdbx with password `demo`. The source checkout contains no database files; diagnostics generate disposable fictional fixtures locally.
 
+On the open screen and open/create dialogs, use the eye button inside a master-password input to show or hide it. Showing is explicit; hiding removes the temporary visible copy. Disabling the password factor, closing its dialog, locking, or completing decryption clears/hides both representations. Reveal does not copy anything to the clipboard. Entry password fields remain visible by design.
+
 ## Organize one database
+
+KeePassHQ starts in a centered, resizable window. The centered header switch selects Viewer or Organizer; hover its icons for their names. The right-side actions are Undo, Save, optional Recovery copy, Close, Lock, and Settings at the far right. Styled tooltips describe each action. Panel headings show the database filename, record count and full path. Folder icons identify groups and key icons identify entries; active groups remain green.
 
 Viewer shows one card browser. Organizer shows two equal browsers of the same session. No Old/New folders are created. Each pane starts at the root and navigates independently. Clicking a group opens the next column to its right. Selecting a different group at that level replaces deeper columns.
 

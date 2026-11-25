@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Refreshed the WPF interface: normal centered startup, centered view switch, icon-only toolbar, far-right Settings, styled tooltips/menus/dropdowns, blue notifications and labeled file pickers.
+- Added explicit password reveal to open/create inputs, with synchronization and clearing on hide, disable, close, lock and decryption; expanded synthetic validation to 338 assertions.
+- Made browsers more compact with white bordered panels/columns, folder/key icons, centered captions, narrow scrollbars and full database paths beneath record counts.
 - Adversarial follow-up: retain unique encrypted replacement preimages before verification, so failures or crashes cannot expose an unverified competing version to rolling-backup overwrite.
 - Discover previous checkpoints when their primary draft is missing; offer explicit older-checkpoint recovery for damaged latest drafts without removing the damaged file.
 - Queue Lock during decryption, cancel pending transfer/close conflict decisions on Lock, and clear creation-dialog passwords when no database is loaded.
