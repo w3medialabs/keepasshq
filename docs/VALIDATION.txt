@@ -1,0 +1,64 @@
+Permanent repository validation — November 25, 2026
+Repository: https://github.com/w3medialabs/keepasshq
+
+PASS all 57 prepared source files copied and SHA-256 compared before edits.
+     Original source directory and supplied archives retained unchanged.
+PASS Windows PowerShell: powershell -NoProfile -File .\validate.ps1 -Render
+     Release and diagnostics compile without compiler warnings.
+PASS 306 synthetic assertions using fictional fixtures and isolated clipboard.
+PASS release diagnostics metadata/commands exclusion and embedded hash checks.
+PASS all seven synthetic renders generated and visually inspected:
+     viewer, organizer, generator, gap, unlock, create and dual.
+PASS extracted staged-source archive rebuild and complete validation from a
+     path containing spaces, invoked from outside that extracted checkout.
+PASS local Markdown links, PowerShell syntax and staged whitespace checks.
+PASS staged inventory reviewed for secret patterns, personal paths and runtime
+     artifacts; generated fixtures/builds remain ignored and upstream material retained.
+PASS bundled KeePass Authenticode status Valid, signer Dominik Reichl.
+PASS canonical W3ML authority matches installed version 1.2; its file revision
+     remains 811870ae4e95f3f939cffb68aa991639ffff74d3.
+
+The application C# source, pinned dependency, legacy draft paths and metadata
+identifiers are unchanged by this migration. The build script now resolves
+relative paths against PowerShell's current directory. New validation tooling, repository
+instructions, documentation and manual CI configuration surround that source.
+The hashes below describe this repository build; compiler timestamps can change
+wrapper hashes across builds. The earlier package evidence follows separately.
+PASS release diagnostics exclusion and embedded dependency integrity
+Release SHA-256: C5E29F8B9AD2D901E1343E5735C8072559E1ADB46D4EC8A46DA059085D34169B
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Original prepared-package record (historical) ---
+
+KeePassHQ 1.2 — validation performed November 25, 2026
+
+PASS 306 synthetic assertions from the final corresponding source package.
+PASS release and diagnostics compiled without compiler warnings.
+PASS separate source-package release rebuild using its bundled dependency.
+PASS release metadata excludes Tests, IsolatedClipboard, diagnostic command
+     modes and all save/draft/create/recovery fault-injection hooks.
+PASS embedded KeePass 2.62.0.0 resource SHA-256 equals the pinned binary.
+PASS upstream dependency Authenticode status Valid, Dominik Reichl.
+PASS fictional Demo.kdbx readback with password demo: 3 entries, no file changes.
+PASS synthetic WPF renders inspected: organizer, open, create, dual-file layout;
+     viewer and generator previews rendered successfully.
+PASS explicit source/portable archive inventory and local documentation links.
+
+No real vaults, real key factors, account-protection files or user clipboard were
+accessed. UI tests use in-process WPF controls and an isolated clipboard. This is
+a development review, not an independent audit or full penetration test. Actual
+pointer gestures, live OneDrive behavior and real account-key factors were not
+exercised. CI is prepared locally and has not been run on a hosted repository.
+
+Cross-database copies/moves require an explicit Save decision. The destination
+is committed and verified before source removal. A failed/interrupted operation
+may leave duplicates; no distributed atomic transaction is claimed.
+
+Wrapper: unsigned; Windows x64, .NET Framework 4.8+.
+Release exe SHA-256: 793BE91A69554B5E5CD4138192E5E329BC39EEE4AB996B5F075086C90C3FCAF2
+Embedded KeePass SHA-256:
+AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+The source package includes application source, verified managed dependency,
+upstream v2.62 source mirror snapshot, GPL notices, Bootstrap icon attribution,
+build instructions, synthetic tests, documentation and CI configuration.

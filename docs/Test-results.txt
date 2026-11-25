@@ -1,0 +1,7 @@
+PASS read-only opening, moves, mixed reordering, encryption, preservation, backups, concurrent edits, and gate release
+PASS three-way merge, competing field choices, deletion review, and order retention
+PASS authenticated draft checkpoints, no shared-file publication, restart recovery, and external changes
+PASS CSPRNG rules/bounds, structure validation, recovery destination races, and damaged-write rejection
+PASS matching browsers, mirrored edits, mode switching, generator actions, animated gap wiring, reminders, timeout, closing, and failed-checkpoint choices
+PASS database creation, no-overwrite races, dual-session isolation, independent drafts, destination-first transfers, metadata preservation, and failed-transfer source retention
+PASS 306 assertions; fictional data and an isolated clipboard only

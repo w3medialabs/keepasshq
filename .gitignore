@@ -1,0 +1,25 @@
+# Real vaults, factors, private drafts and backups must never enter the repo.
+*.kdbx
+*.kdb
+*.key
+*.keyx
+*.vdo-draft*
+*.organizer-lock
+*.lock
+*.settings
+*.versions/
+*.tmp
+*.bak
+ProtectedUserKey.bin
+# Build/diagnostic output may include synthetic plaintext or generated vaults.
+**/bin/
+**/bin-diagnostics/
+test-output/
+release-output/
+**/render-*/
+**/synthetic-*/
+*.pdb
+.vs/
+.idea/
+Thumbs.db
+Desktop.ini

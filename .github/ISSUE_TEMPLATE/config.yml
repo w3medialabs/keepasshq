@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Confidential security report
+    url: https://github.com/w3medialabs/keepasshq/security/advisories/new
+    about: Report suspected vulnerabilities privately; never attach real vaults or factors.

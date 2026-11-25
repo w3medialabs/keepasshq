@@ -1,0 +1,23 @@
+name: Windows build and synthetic validation
+on:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: windows-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - name: Build, validate release boundaries, test and render fictional UI
+        shell: powershell
+        run: .\validate.ps1 -Render
+      - name: Upload synthetic validation summaries and previews
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: KeePassHQ-validation
+          path: |
+            test-output/test-results.txt
+            test-output/validation.txt
+            test-output/renders/*.png
+          if-no-files-found: error
