@@ -1,3 +1,6 @@
+Prepared source-package summary (historical; 306 assertions).
+Current results: see ADVERSARIAL-AUDIT.md and VALIDATION.txt.
+
 PASS read-only opening, moves, mixed reordering, encryption, preservation, backups, concurrent edits, and gate release
 PASS three-way merge, competing field choices, deletion review, and order retention
 PASS authenticated draft checkpoints, no shared-file publication, restart recovery, and external changes

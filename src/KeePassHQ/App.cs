@@ -510,7 +510,7 @@ namespace VaultOrganizer
             catch (Exception ex)
             {
                 working.SaveFailed(); saveBlocked = true; recoveryButton.Visibility = Visibility.Visible;
-                string message = ex is IOException && ex.Message.Contains("changed") ? ex.Message : "Save failed. Your edits remain in memory. Check the file/folder, retry with Ctrl+S, or save a recovery copy.";
+                string message = working.PublishingBlocked ? "A competing file version could not be verified or secured. Further saves are blocked to protect it. Keep the version backups and save a recovery copy." : (ex is IOException && ex.Message.Contains("changed") ? ex.Message : "Save failed. Your edits remain in memory. Check the file/folder, retry with Ctrl+S, or save a recovery copy.");
                 Toast(message, true); return false;
             }
         }

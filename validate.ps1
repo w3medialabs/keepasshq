@@ -2,6 +2,7 @@ param([switch]$Render)
 $ErrorActionPreference = 'Stop'
 Push-Location $PSScriptRoot
 try {
+    & .\scripts\check-source.ps1
     & .\build.ps1 -OutputDirectory .\bin
     & .\build.ps1 -Diagnostics -OutputDirectory .\bin-diagnostics
     $releasePath = (Resolve-Path .\bin\KeePassHQ.exe).Path
@@ -15,8 +16,8 @@ try {
     $releaseMetadata = [Text.Encoding]::ASCII.GetString($releaseBytes)
     $diagnosticMetadata = [Text.Encoding]::ASCII.GetString($diagnosticBytes)
     foreach ($name in @('Tests', 'IsolatedClipboard', 'BeforeRecoveryPublish', 'AfterSaveWrite',
-        'BeforeSaveReplace', 'BeforeDraftPublish', 'BeforeCreatePublish', 'RenderDemo',
-        'TestWorkflow', 'TestMultipleDatabases')) {
+        'BeforeSaveReplace', 'AfterSaveReplace', 'BeforeDraftPublish', 'BeforeCreatePublish', 'RenderDemo',
+        'TestWorkflow', 'TestMultipleDatabases', 'AuditChecks', 'TestAuditWorkflow', 'IsolatedDraftRoot')) {
         $token = $name + [char]0
         if ($releaseMetadata.Contains($token) -or !$diagnosticMetadata.Contains($token)) {
             throw "Release/diagnostics metadata boundary failed: $name"
@@ -44,7 +45,7 @@ try {
     if ($Render) {
         $renderRoot = Join-Path $results 'renders'
         New-Item -ItemType Directory -Path $renderRoot -Force | Out-Null
-        foreach ($mode in @('viewer', 'organizer', 'generator', 'gap', 'unlock', 'create', 'dual')) {
+        foreach ($mode in @('viewer', 'organizer', 'generator', 'gap', 'unlock', 'create', 'dual', 'recovery', 'reminder')) {
             $image = Join-Path $renderRoot ($mode + '.png')
             $process = Start-Process -FilePath $diagnosticsPath -ArgumentList @('--render-demo', ('"' + $image + '"'), $mode) -WindowStyle Hidden -Wait -PassThru
             if ($process.ExitCode -ne 0 -or !(Test-Path -LiteralPath $image)) { throw "Synthetic render failed: $mode" }

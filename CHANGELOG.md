@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Adversarial follow-up: retain unique encrypted replacement preimages before verification, so failures or crashes cannot expose an unverified competing version to rolling-backup overwrite.
+- Discover previous checkpoints when their primary draft is missing; offer explicit older-checkpoint recovery for damaged latest drafts without removing the damaged file.
+- Queue Lock during decryption, cancel pending transfer/close conflict decisions on Lock, and clear creation-dialog passwords when no database is loaded.
+- Report actual checkpoint protection state in save reminders and require isolated draft defaults in diagnostics.
+- Add adversarial regressions (329 total assertions), recovery/reminder renders, and automated source inventory, link, secret-pattern, provenance and branding checks.
 - Established [w3medialabs/keepasshq](https://github.com/w3medialabs/keepasshq) as the permanent public source repository from the prepared 1.2 source package.
 - Added repository-specific installation, contribution, security and release links; clarified source-only fixture behavior and recovery documentation.
 - Added `validate.ps1` for release/diagnostics builds, release boundary and embedded dependency checks, synthetic tests and seven optional renders.

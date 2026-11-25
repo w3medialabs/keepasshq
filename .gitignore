@@ -3,6 +3,11 @@
 *.kdb
 *.key
 *.keyx
+*.pem
+*.pfx
+*.p12
+.env
+.env.*
 *.vdo-draft*
 *.organizer-lock
 *.lock

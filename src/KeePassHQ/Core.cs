@@ -40,8 +40,10 @@ namespace VaultOrganizer
         internal static Action<string> BeforeRecoveryPublish;
         internal static Action<string> AfterSaveWrite;
         internal static Action BeforeSaveReplace;
+        internal static Action<string> AfterSaveReplace;
 #endif
         public bool Dirty { get { return Revision != SavedRevision; } }
+        public bool PublishingBlocked { get { return replacementBlocked; } }
 
         public static CompositeKey MakeKey(string password, bool usePassword, string keyFile, bool windowsAccount)
         {
@@ -203,16 +205,27 @@ namespace VaultOrganizer
                         if (BeforeSaveReplace != null) BeforeSaveReplace();
 #endif
                         string previousPath = System.IO.Path.Combine(backupDir, "previous.kdbx");
-                        File.Replace(temp, PathName, previousPath, true);
+                        // Capture into a unique path first. A crash or unreadable preimage
+                        // must not leave the only competing copy in a rolling overwrite slot.
+                        string preimagePath = System.IO.Path.Combine(backupDir, "preimage-" + Guid.NewGuid().ToString("N") + ".kdbx");
+                        File.Replace(temp, PathName, preimagePath, true);
                         temp = null;
                         var result = new SaveResult { Revision = revision, Hash = hash, Baseline = snapshot };
-                        if (!HashFile(previousPath).SequenceEqual(expectedHash))
+                        try
                         {
-                            string preserved = System.IO.Path.Combine(backupDir, "concurrent-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8) + ".kdbx");
-                            try { File.Move(previousPath, preserved); }
-                            catch { replacementBlocked = true; throw new IOException("A competing version is preserved in previous.kdbx, but could not be secured for automatic merge. No further publishing is permitted in this session; save a recovery copy."); }
-                            result.ConcurrentPath = preserved; result.ConcurrentBase = Snapshot(baseline);
+#if DIAGNOSTICS
+                            if (AfterSaveReplace != null) AfterSaveReplace(preimagePath);
+#endif
+                            if (!HashFile(preimagePath).SequenceEqual(expectedHash))
+                            {
+                                string preserved = System.IO.Path.Combine(backupDir, "concurrent-" + DateTime.UtcNow.ToString("yyyyMMdd-HHmmss") + "-" + Guid.NewGuid().ToString("N").Substring(0, 8) + ".kdbx");
+                                File.Move(preimagePath, preserved);
+                                result.ConcurrentPath = preserved; result.ConcurrentBase = Snapshot(baseline);
+                            }
+                            else if (File.Exists(previousPath)) File.Replace(preimagePath, previousPath, null, true);
+                            else File.Move(preimagePath, previousPath);
                         }
+                        catch (Exception ex) { replacementBlocked = true; throw new IOException("The database was replaced, but its previous version could not be verified or secured for automatic merge. No further publishing is permitted in this session. Preserve the version backups and save a recovery copy.", ex); }
                         snapshot = null; return result;
                     }
                 }

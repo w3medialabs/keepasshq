@@ -17,8 +17,8 @@ KeePass models retain the rich database. Five visible string fields are edited d
 1. Snapshot and validate the working database/revision.
 2. Acquire a short KeePass FileLock, compare current SHA-256 with the expected bytes, and preserve the first-session original.
 3. Write a uniquely owned encrypted candidate, flush it and fully decrypt it for verification.
-4. Recheck the shared file immediately before atomic replacement; retain the preimage as previous.kdbx.
-5. Compare that preimage with the expected bytes. A last-instant ignoring writer is retained as a unique concurrent archive and reconciled; unknown versions block further publication.
+4. Recheck the shared file immediately before atomic replacement; capture its preimage under a unique encrypted filename.
+5. Compare that preimage with the expected bytes. A verified expected preimage becomes rolling previous.kdbx. A last-instant ignoring writer becomes a unique concurrent archive for reconciliation. Unreadable or unarchivable versions retain a unique preimage file and block further publication in that session; subsequent sessions never reuse that filename.
 6. Accept the written snapshot as the saved baseline. Revision comparison keeps later local work dirty. Two loaded files save sequentially; they are not one filesystem transaction.
 
 When a hash changed, a baseline/local/external plan identifies compatible field edits, parent moves, presence/deletion and card-order conflicts. KeePass MergeIn preserves rich metadata/history/tombstones; explicit three-way patches reconcile the editable fields and order. A conflict decision is required for incompatible changes. Keep both clones the complete external entry with fresh identities. The external file's noneditable database settings are retained rather than silently weakened.
@@ -28,6 +28,8 @@ When a hash changed, a baseline/local/external plan identifies compatible field 
 A `.vdo-draft` is a ZIP container of encrypted KDBX documents: working, baseline and optional pending-file/pending-base. Authenticated encrypted role and shared nonce tags prevent mixing valid components from different roles/branches. Raw key factors are not stored next to the bundle. An unchanged validated baseline ciphertext is reused, reducing KDF work.
 
 Paths are SHA-256-derived from the absolute original database path plus a session identifier. Separate branches are not silently overwritten. Legacy `%LOCALAPPDATA%\VaultOrganizer\Drafts` and metadata names remain intentional compatibility details. Successful Save/discard removes only the active/resumed branch. Lock checkpoints final work, then releases all sessions and view/undo/key references. Failure retains working memory with an explicit incomplete state and recovery choices.
+
+Each replaced draft keeps a `.previous` checkpoint. Discovery includes a backup whose primary is missing. A damaged primary fails authentication/readback normally; selecting its older checkpoint requires an explicit fallback decision. The fallback retains the damaged primary and uses a separate active branch. Both paths retain role/nonce/root validation. Lock requests during decryption are queued; requests during transfer/close conflict review cancel the pending decision and queue safe closure. Locking an empty session also clears any creation/open dialog secrets.
 
 ## Cross-file transfer
 

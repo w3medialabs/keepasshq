@@ -39,7 +39,9 @@
 - Last completed edit is checkpointed before a successful lock/close. Successful closure releases both sessions and gates; no reauthentication is required to exit a locked window.
 - Protection failures offer retry, recovery to another location, or explicit discard. Failure is never labeled as a successful lock.
 - Encrypted baseline/working/pending-conflict recovery branches survive restart. Existing drafts must be resumed, explicitly discarded, or left by canceling that database's opening.
+- Backup-only checkpoints remain discoverable; a damaged latest draft offers an explicit older-checkpoint fallback while preserving the damaged primary.
 - Unique encrypted save candidates, full decryption verification, atomic filesystem replacement, first-session backup, rolling previous copy and late-writer preservation.
+- Replacement preimages start under unique encrypted filenames. An unreadable preimage blocks further publication in that session and remains preserved across later sessions.
 - SHA-256 change detection, three-way field/group/order reconciliation, conflict choices and complete Keep-both entry copies.
 
 ## Generator and clipboard

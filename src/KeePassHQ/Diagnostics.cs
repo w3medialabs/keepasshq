@@ -122,6 +122,7 @@ namespace VaultOrganizer
         internal void RenderDemo(string destination, string mode)
         {
             rendering = true; heartbeat.Stop(); clipboard = new IsolatedClipboard();
+            VaultSession.IsolatedDraftRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "render-drafts-" + Guid.NewGuid().ToString("N"));
             if (mode != "unlock" && mode != "create")
             {
                 string dir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"render-"+Guid.NewGuid().ToString("N")); Directory.CreateDirectory(dir);
@@ -131,6 +132,8 @@ namespace VaultOrganizer
                 panes[0].Path.Add(imports);panes[0].Expanded=imports.Entries.First().Uuid.ToHexString();panes[1].Path.Add(target);panes[1].Expanded=e.Uuid.ToHexString();RenderAll();
                 saveStatus.Text="Unsaved changes · encrypted draft protected · Ctrl+S to publish";
                 if(mode=="generator")ShowGenerator(FieldBox(panes[0],imports.Entries.First(),PwDefs.PasswordField));
+                if(mode=="recovery") { var decision = AskPreviousCheckpoint(); }
+                if(mode=="reminder") { dirtyTicks=Stopwatch.GetTimestamp()-240*Stopwatch.Frequency;lastNudgeTicks=lastStrongTicks=0;NudgeSave();SetStatus(); }
                 if(mode=="gap"){var gap=panes[1].Columns.Children.OfType<Grid>().Last();var receive=Descendants<Border>(gap).First(b=>b.AllowDrop&&b.Height==7);receive.Height=45;receive.Background=Brush("#DDF2E5");receive.BorderBrush=Brush("#8DBDA0");receive.BorderThickness=new Thickness(1);}
                 if(mode=="dual")
                 {

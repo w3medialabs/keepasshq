@@ -21,12 +21,19 @@ namespace VaultOrganizer
         private const string RoleKey = "VaultOrganizer.PrivateDraft.Role", NonceKey = "VaultOrganizer.PrivateDraft.Nonce";
 #if DIAGNOSTICS
         internal static Action BeforeDraftPublish;
+        internal static string IsolatedDraftRoot;
 #endif
         public long DraftRevision = -1;
         public DateTime LastDraftUtc = DateTime.MinValue;
         public bool DraftExists { get { return RecoveryCandidate() != null; } }
+        public bool DraftIsPreviousCheckpoint { get { string path = RecoveryCandidate(); return path != null && path.EndsWith(".vdo-draft.previous", StringComparison.OrdinalIgnoreCase); } }
+        public bool HasPreviousCheckpoint { get { string path = RecoveryCandidate(); return path != null && !DraftIsPreviousCheckpoint && File.Exists(path + ".previous"); } }
         public void ConfigureDraftRoot(string root)
         {
+#if DIAGNOSTICS
+            root = root ?? IsolatedDraftRoot;
+            if (root == null) throw new InvalidOperationException("Diagnostics require an isolated draft root.");
+#endif
             root = root ?? System.IO.Path.Combine(Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData), "VaultOrganizer", "Drafts");
             string token;
             using (var sha = SHA256.Create()) token = BitConverter.ToString(sha.ComputeHash(Encoding.UTF8.GetBytes(PathName.ToUpperInvariant()))).Replace("-", "");
@@ -45,7 +52,10 @@ namespace VaultOrganizer
             if (selectedDraft != null && File.Exists(selectedDraft)) return selectedDraft;
             string root = System.IO.Path.GetDirectoryName(draftPrefix);
             if (!Directory.Exists(root)) return null;
-            selectedDraft = Directory.GetFiles(root, System.IO.Path.GetFileName(draftPrefix) + ".*.vdo-draft").OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
+            selectedDraft = Directory.GetFiles(root, System.IO.Path.GetFileName(draftPrefix) + ".*.vdo-draft*")
+                .Where(path => path.EndsWith(".vdo-draft", StringComparison.OrdinalIgnoreCase) ||
+                    (path.EndsWith(".vdo-draft.previous", StringComparison.OrdinalIgnoreCase) && !File.Exists(path.Substring(0, path.Length - ".previous".Length))))
+                .OrderByDescending(File.GetLastWriteTimeUtc).FirstOrDefault();
             return selectedDraft;
         }
         private static void ZipDatabase(ZipArchive archive, string name, PwDatabase db)
@@ -110,10 +120,11 @@ namespace VaultOrganizer
             selectedDraft = null;
         }
         public void ReleaseFileGate() { if (gate != null) { gate.Dispose(); gate = null; } }
-        public Task<MergePlan> ResumeDraftAsync()
+        public Task<MergePlan> ResumeDraftAsync(bool previousCheckpoint = false)
         {
             var plan = new MergePlan { External = Snapshot(Database), FileHash = (byte[])expectedHash.Clone(), Revision = Revision };
             string source = RecoveryCandidate(); CompositeKey key = Database.MasterKey;
+            if (previousCheckpoint) source = source == null || DraftIsPreviousCheckpoint ? null : source + ".previous";
             return Task.Run(() =>
             {
                 try
@@ -135,7 +146,12 @@ namespace VaultOrganizer
                     if (plan.Local.CustomData.Get(RoleKey) != "working" || plan.Baseline.CustomData.Get(RoleKey) != "baseline" || String.IsNullOrEmpty(plan.Local.CustomData.Get(NonceKey)) || plan.Local.CustomData.Get(NonceKey) != plan.Baseline.CustomData.Get(NonceKey)) throw new InvalidDataException("Draft pairing or roles are invalid.");
                     foreach (var db in new[] { plan.Local, plan.Baseline }) { db.CustomData.Remove(RoleKey); db.CustomData.Remove(NonceKey); }
                     if (!plan.Local.RootGroup.Uuid.Equals(plan.External.RootGroup.Uuid) || !plan.Baseline.RootGroup.Uuid.Equals(plan.External.RootGroup.Uuid)) throw new InvalidDataException("Draft belongs to another database.");
-                    plan.Analyze(); return plan;
+                    plan.Analyze();
+                    // An explicitly selected fallback is a separate recovered branch. Keep the
+                    // damaged primary for inspection instead of overwriting/removing it later.
+                    if (previousCheckpoint && source == DraftPath + ".previous") DraftPath = draftPrefix + "." + Guid.NewGuid().ToString("N") + ".vdo-draft";
+                    selectedDraft = source;
+                    return plan;
                 }
                 catch { plan.Dispose(); throw; }
             });

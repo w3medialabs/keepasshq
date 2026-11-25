@@ -177,7 +177,8 @@ namespace VaultOrganizer
             if ((age >= 180 || completedActions >= 30) && Elapsed(lastStrongTicks) >= 180)
             {
                 lastStrongTicks = Stopwatch.GetTimestamp(); var body = new StackPanel();
-                var note = Text("Your edits are protected in a local draft, but other users cannot see them until you save the database.", 13, "#64748C"); note.TextWrapping = TextWrapping.Wrap; body.Children.Add(note);
+                bool protectedEdits = LoadedSessions.Where(s => s.Dirty).All(s => s.DraftRevision == s.Revision);
+                var note = Text(protectedEdits ? "Your edits are protected in a local draft, but other users cannot see them until you save the database." : "Your latest edits are not yet protected in an encrypted draft. Save the database now, or keep this window open until a checkpoint succeeds.", 13, "#64748C"); note.TextWrapping = TextWrapping.Wrap; body.Children.Add(note);
                 var row = new StackPanel { Orientation = Orientation.Horizontal, HorizontalAlignment = HorizontalAlignment.Right, Margin = new Thickness(0, 20, 0, 0) };
                 row.Children.Add(Button("Keep editing", () => { CloseModal(); Activity(); }, "Quiet")); var save = Button("Save database", async () => { CloseModal(); await SaveNow(true); }, "Primary"); save.Margin = new Thickness(8, 0, 0, 0); row.Children.Add(save); body.Children.Add(row); Dialog("Save your progress", body);
             }
@@ -207,19 +208,37 @@ namespace VaultOrganizer
         { if (modalChoice == null) return; var completion = modalChoice; modalChoice = null; CloseModal(); completion.TrySetResult(choice); }
         private async Task OfferDraft()
         {
-            int choice = await Ask("Unpublished work found", "An encrypted local draft exists for this database. Resume it and reconcile any external edits, or discard it explicitly.", "Cancel", "Discard draft", "Resume draft");
+            int choice = await Ask("Unpublished work found", session.DraftIsPreviousCheckpoint ? "Only a previous encrypted checkpoint was found. It can be older than your latest edits. Resume and review it, or discard it explicitly." : "An encrypted local draft exists for this database. Resume it and reconcile any external edits, or discard it explicitly.", "Cancel", "Discard draft", "Resume draft");
             if (choice == 0) { DisposeSession(); ShowLocked("Database closed. The draft was kept."); return; }
             if (choice == 1) { session.RemoveDraft(); return; }
             MergePlan plan = null; editingSuspended = true; UpdateInteraction();
             try
             {
-                plan = await session.ResumeDraftAsync();
+                plan = await ReadDraftForReview(session);
+                if (plan == null) { DisposeSession(); ShowLocked("Database closed. The draft was kept."); return; }
                 foreach (var conflict in plan.Conflicts) { conflict.Choice = await ReviewConflict(conflict); if (conflict.Choice == MergeChoice.Cancel) { DisposeSession(); ShowLocked("Draft kept. Unlock to resume it."); return; } }
                 session.ApplyMerge(plan); BuildPanes(); RecordAction(); Toast("Draft resumed. Save the database when these changes are ready to share.", false);
             }
             catch { Toast("Draft could not be opened with this key, or could not be safely merged. It has been kept unchanged.", true); DisposeSession(); ShowLocked("Draft retained. No data was overwritten."); }
             finally { if (plan != null) plan.Dispose(); editingSuspended = false; UpdateInteraction(); }
         }
+        private async Task<MergePlan> ReadDraftForReview(VaultSession working)
+        {
+            bool previous = false;
+            while (true)
+            {
+                try { return await working.ResumeDraftAsync(previous); }
+                catch
+                {
+                    if (previous || !working.HasPreviousCheckpoint) throw;
+                }
+                int choice = await AskPreviousCheckpoint();
+                if (choice == 0) return null;
+                previous = choice == 2;
+            }
+        }
+        private Task<int> AskPreviousCheckpoint()
+        { return Ask("Latest draft unavailable", "The latest draft could not be authenticated or read. It has been kept unchanged. A previous checkpoint is available, but can omit newer edits. Resume it only if you want to review that older work.", "Cancel opening", "Retry latest", "Resume previous"); }
         private void ShowLocked(string message)
         { unlockTitle.Text = "Database closed and locked"; unlockHint.Text = message; unlock.Visibility = Visibility.Visible; unlockButton.IsEnabled = true; password.Clear(); }
         private void DisposeSession()
@@ -230,10 +249,11 @@ namespace VaultOrganizer
         }
         private async Task Seal(bool close)
         {
-            if (changingDatabase) { lockAfterChange = true; closeAfterChange |= close; return; }
-            if (transferring) { lockAfterTransfer = true; closeAfterTransfer |= close; return; }
-            if (sealing || opening) return;
-            if (session == null) { if (close) QueueClose(); return; }
+            if (changingDatabase) { lockAfterChange = true; closeAfterChange |= close; FinishReview(MergeChoice.Cancel); return; }
+            if (transferring) { lockAfterTransfer = true; closeAfterTransfer |= close; FinishReview(MergeChoice.Cancel); return; }
+            if (opening) { lockAfterOpen = true; closeAfterOpen |= close; FinishReview(MergeChoice.Cancel); CompleteChoice(0); CloseModal(); password.Clear(); return; }
+            if (sealing) return;
+            if (session == null) { FinishReview(MergeChoice.Cancel); CompleteChoice(0); CloseModal(); password.Clear(); ClearOwnedClipboard(true); if (close) QueueClose(); return; }
             sealing = true; protectionFailure = false; locked = true;
             FinishReview(MergeChoice.Cancel); CompleteChoice(0); CloseModal();
             unlockTitle.Text = "Protecting your work…"; unlockHint.Text = "Writing an encrypted draft before releasing the database."; unlock.Visibility = Visibility.Visible; unlockButton.IsEnabled = false;

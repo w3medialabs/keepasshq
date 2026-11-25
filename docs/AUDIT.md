@@ -4,6 +4,8 @@ Reviewed November 25, 2026 for KeePassHQ 1.2. Scope: application source, databas
 
 No real vault, real master key, real key file, Windows account-protection file or user clipboard was accessed. Tests generated fictional KDBX files and isolated key/draft/clipboard services. Native password-manager automation was not used.
 
+The original package review below is historical evidence. The subsequent [adversarial follow-up](ADVERSARIAL-AUDIT.md) found and corrected additional edge cases and expanded validation to 329 assertions; it does not convert either review into independent certification.
+
 ## Corrections verified
 
 | Area | Risk addressed | Resolution |

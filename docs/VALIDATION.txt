@@ -1,3 +1,37 @@
+Adversarial follow-up validation — November 25, 2026
+Repository: https://github.com/w3medialabs/keepasshq
+Starting source commit: 37edbe9540f58aceebd6beb7d741b4291828e078
+
+PASS powershell -NoProfile -File .\validate.ps1 -Render
+PASS 329 synthetic assertions (23 additions to the original 306).
+PASS release and diagnostics builds without compiler warnings.
+PASS release excludes diagnostics, isolated draft defaults and all fault hooks.
+PASS nine synthetic WPF renders; recovery/reminder changes visually inspected.
+PASS authenticated previous-checkpoint discovery/fallback, damaged-primary
+     preservation, queued/canceled lifecycle decisions and accurate reminders.
+PASS fault-injected unreadable preimage retains the late writer; retry is blocked;
+     local recovery and a later session cannot overwrite that unique encrypted file.
+PASS source inventory, documentation links, secret/personal-path patterns,
+     corresponding upstream source mirror hash and branding consistency.
+PASS source-check negative cases reject a broken link and a fictional token pattern.
+PASS PowerShell syntax, local diff review and dependency Authenticode (Dominik Reichl).
+PASS clean staged-source archive extraction into a path with spaces, then complete
+     validation (329 assertions, nine renders, source and release-boundary checks)
+     invoked from outside that extracted checkout.
+Extracted-source release SHA-256:
+DD9133C59779FC017B65A1820F30B02A267D33DE729A285F8AFF033072256D2B
+
+Only fictional fixtures, isolated default drafts and the test clipboard were used.
+KeePass 2.62, upstream source/licenses, Bootstrap notices and legacy identifiers
+remain unchanged. See docs/ADVERSARIAL-AUDIT.md for findings and remaining limits.
+No hosted CI success, publisher signing or independent certification is claimed.
+The earlier migration and package records below are historical evidence.
+PASS release diagnostics exclusion and embedded dependency integrity
+Release SHA-256: 65F64D100C3F57E730D4266E1FBD15CDC1F7A3E42A0FBEAAB182944E119FCE8B
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Initial migration record (historical) ---
+
 Permanent repository validation — November 25, 2026
 Repository: https://github.com/w3medialabs/keepasshq
 

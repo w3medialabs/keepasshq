@@ -201,13 +201,14 @@ namespace VaultOrganizer
         }
         private async Task OfferPaneDraft(VaultSession working)
         {
-            int choice = await Ask("Unpublished work found", System.IO.Path.GetFileName(working.PathName) + " has an encrypted local draft. Resume and reconcile it, discard it explicitly, or cancel opening this database.", "Cancel opening", "Discard draft", "Resume draft");
+            int choice = await Ask("Unpublished work found", System.IO.Path.GetFileName(working.PathName) + (working.DraftIsPreviousCheckpoint ? " has only a previous encrypted checkpoint, which can omit newer edits." : " has an encrypted local draft.") + " Resume and reconcile it, discard it explicitly, or cancel opening this database.", "Cancel opening", "Discard draft", "Resume draft");
             if (choice == 0) { DetachUnchanged(working); return; }
             if (choice == 1) { working.RemoveDraft(); return; }
             MergePlan plan = null; editingSuspended = true; UpdateInteraction();
             try
             {
-                plan = await working.ResumeDraftAsync();
+                plan = await ReadDraftForReview(working);
+                if (plan == null) { DetachUnchanged(working); return; }
                 foreach (var conflict in plan.Conflicts) { conflict.Choice = await ReviewConflict(conflict); if (conflict.Choice == MergeChoice.Cancel) { DetachUnchanged(working); return; } }
                 working.ApplyMerge(plan); undo.Clear(); BuildPanes(); RecordAction();
             }

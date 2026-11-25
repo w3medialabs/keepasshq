@@ -38,7 +38,7 @@ Save publishes every loaded database sequentially. Each session first checks the
 
 The app holds a local `.organizer-lock` sidecar gate while a file is open and a short standard KeePass file lock while replacing it. This gate coordinates KeePassHQ windows on this machine, not every application or remote device. SHA-256 checks and post-replacement preimage checks preserve late competing writers. No app can detect OneDrive edits that have not reached the local file. Let sync finish before opening and after saving; use a local materialized file rather than an unavailable online-only placeholder.
 
-Beside each database is a `<database>.versions` directory. It contains a byte-preserving first-session backup and a rolling `previous.kdbx`, plus uniquely named concurrent versions when needed. Keep these encrypted files private like the original. Backups are retained; the app does not prune them automatically. Encrypted temporary files may remain after a hard crash; do not delete anything until your saved database and recovery copies are verified.
+Beside each database is a `<database>.versions` directory. It contains a byte-preserving first-session backup and a rolling `previous.kdbx`, plus uniquely named concurrent versions when needed. Replacement first captures the prior file as a unique `preimage-*.kdbx`; if verification cannot finish or the app crashes, that file remains independently preserved. Further saves in a session with an unverified competing version are blocked. Keep all encrypted versions private, save a recovery copy of your working edits, and review the retained versions before continuing. Backups are retained; the app does not prune them automatically. Encrypted temporary files may remain after a hard crash; do not delete anything until your saved database and recovery copies are verified.
 
 ## Drafts, lock and close
 
@@ -48,7 +48,11 @@ For compatibility with Vault Organizer 1.1, drafts remain under `%LOCALAPPDATA%\
 
 On unlock, an existing draft must be resumed/reconciled, explicitly discarded, or kept by canceling opening. Separate session branches are retained independently; resuming the most recent branch does not silently erase older ones. Inspect older recovery branches before deleting them.
 
+A previous checkpoint is discoverable if its primary draft is missing. If the latest draft is damaged or unreadable and a previous checkpoint exists, choose **Cancel opening**, **Retry latest**, or **Resume previous**. Previous checkpoints can omit newer edits; review the recovered data before saving. The damaged primary is retained separately even after the older work is saved, so a later opening may still offer that retained branch. Discard it only after confirming recovery is complete.
+
 **Lock/Ctrl+L**, inactivity timeout, and Windows session lock protect final edits, release loaded files and discard UI/model/key references. Reopen to decrypt again. **Close** in the header closes all loaded databases and returns to the open screen; unsaved work offers Save or Keep draft. Native window close also supports Cancel. A locked window closes without asking for a password.
+
+Lock requested during decryption is queued. Lock during transfer or database-close conflict review cancels the unresolved decision and closes safely after the active operation stops. Locking before a database is loaded clears the password fields in an open creation dialog. Save reminders distinguish verified checkpoints from latest edits that are not yet protected.
 
 From one pane's Database menu, **Close database** closes just that file if two distinct files are loaded, then both panes browse the remaining file. **Use other pane's database** performs the same safe close. Closing the last file returns to the open screen.
 

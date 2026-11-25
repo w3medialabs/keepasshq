@@ -14,7 +14,7 @@ using KeePassLib.Cryptography.KeyDerivation;
 
 namespace VaultOrganizer
 {
-    internal static class Tests
+    internal static partial class Tests
     {
         private static int checks;
         private static void Check(bool value,string description){if(!value)throw new Exception(description);++checks;}
@@ -271,6 +271,7 @@ namespace VaultOrganizer
         public static int Run(string baseDirectory)
         {
             Directory.CreateDirectory(baseDirectory);string run=System.IO.Path.Combine(baseDirectory,"synthetic-"+Guid.NewGuid().ToString("N"));Directory.CreateDirectory(run);var log=new List<string>();
+            VaultSession.IsolatedDraftRoot = System.IO.Path.Combine(run, "default-drafts");
             try
             {
                 Check(String.IsNullOrEmpty(typeof(PwDatabase).Assembly.Location),"Library loaded from embedded resource");
@@ -279,6 +280,7 @@ namespace VaultOrganizer
                 MergeChecks(run);log.Add("PASS three-way merge, competing field choices, deletion review, and order retention");
                 DraftChecks(run);log.Add("PASS authenticated draft checkpoints, no shared-file publication, restart recovery, and external changes");
                 SecurityChecks(run);log.Add("PASS CSPRNG rules/bounds, structure validation, recovery destination races, and damaged-write rejection");
+                AuditChecks(run);log.Add("PASS previous-checkpoint discovery, explicit fallback, damaged-draft preservation, and unreadable-preimage retention across sessions");
                 var window=new OrganizerWindow();System.Threading.SynchronizationContext.SetSynchronizationContext(new DispatcherSynchronizationContext());
                 var uiDir=System.IO.Path.Combine(run,"ui");Directory.CreateDirectory(uiDir);var workflow=window.TestWorkflow(uiDir,Check);var frame=new DispatcherFrame();var dispatcher=Dispatcher.CurrentDispatcher;
                 workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
@@ -286,6 +288,9 @@ namespace VaultOrganizer
                 window=new OrganizerWindow();workflow=window.TestMultipleDatabases(System.IO.Path.Combine(run,"multi"),Check);frame=new DispatcherFrame();
                 workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
                 log.Add("PASS database creation, no-overwrite races, dual-session isolation, independent drafts, destination-first transfers, metadata preservation, and failed-transfer source retention");
+                window=new OrganizerWindow();workflow=window.TestAuditWorkflow(System.IO.Path.Combine(run,"audit-ui"),Check);frame=new DispatcherFrame();
+                workflow.ContinueWith(task=>dispatcher.BeginInvoke(new Action(()=>frame.Continue=false)));if(!workflow.IsCompleted)Dispatcher.PushFrame(frame);workflow.GetAwaiter().GetResult();
+                log.Add("PASS empty-session locking clears dialog secrets and save reminders reflect checkpoint state");
                 log.Add("PASS "+checks+" assertions; fictional data and an isolated clipboard only");File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 0;
             }
             catch(Exception ex){log.Add("FAIL "+ex.ToString());File.WriteAllLines(System.IO.Path.Combine(baseDirectory,"test-results.txt"),log);return 1;}
