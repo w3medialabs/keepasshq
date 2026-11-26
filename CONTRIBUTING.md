@@ -4,6 +4,8 @@ Keep KeePassHQ focused: clear card browsing, careful editing/reordering, underst
 
 Use [issues](https://github.com/w3medialabs/keepasshq/issues/new/choose) for fictional bug reproductions and focused proposals, and [pull requests](https://github.com/w3medialabs/keepasshq/compare) for reviewed changes. Fork [w3medialabs/keepasshq](https://github.com/w3medialabs/keepasshq) and clone your fork if you do not have repository write access. Maintainer work follows the applicable workspace instructions; external contributors may use a topic branch in their fork.
 
+Choose the bug, feature, help or documentation template. Reports receive a type label and `needs triage`; maintainers use the [issue and label guide](docs/ISSUES.md) for review. Suspected vulnerabilities belong in the private process in SECURITY.md.
+
 1. Read [BUILD](docs/BUILD.md), [ARCHITECTURE](docs/ARCHITECTURE.md), [SECURITY](SECURITY.md), and the [upstream-guidance audit](docs/FINAL-AUDIT.md).
 2. Build and run synthetic tests locally. Use invented accounts under reserved `example.test` domains, disposable databases and isolated clipboard/draft services.
 3. Add targeted tests for behavior with real data-loss/security consequences. Do not add implementation-mirroring tests for cosmetic changes.

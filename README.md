@@ -44,6 +44,7 @@ Use a disposable copy first. Passwords are deliberately visible while entries ar
 | [User guide](docs/USER-GUIDE.md) | Navigation, editing, two databases, saving, drafts and recovery |
 | [In-app Help guide](docs/HELP.md) | Offline topics bundled into the executable |
 | [Reporting privacy](docs/REPORTING.md) | Manual GitHub reports, permitted template data and exclusions |
+| [Issues and labels](docs/ISSUES.md) | Report templates, maintainer triage and reproducible label setup |
 | [Build and tests](docs/BUILD.md) | Offline build, diagnostics, source layout and CI |
 | [Security policy](SECURITY.md) | Threat boundaries and private reporting |
 | [Development audit](docs/AUDIT.md) | Findings, corrections, tests and remaining limits |

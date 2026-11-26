@@ -1,5 +1,8 @@
-blank_issues_enabled: true
+blank_issues_enabled: false
 contact_links:
+  - name: User guide and offline Help
+    url: https://github.com/w3medialabs/keepasshq/blob/main/docs/USER-GUIDE.md
+    about: Check the guide or use F1 in the application before opening a help question.
   - name: Confidential security report
     url: https://github.com/w3medialabs/keepasshq/security/advisories/new
     about: Report suspected vulnerabilities privately; never attach real vaults or factors.

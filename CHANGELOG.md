@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Configure public issue templates for bugs, features, help and documentation, with automatic type/triage labels, documentation/private-security links and a reproducible additive label setup helper.
 - Add offline Help/F1 with twelve navigable topics, a toolbar icon and open-screen access. Help preserves pending key/recovery/conflict dialogs and allows inactivity locking to continue.
 - Add manual reporting guidance with fixed public/private GitHub links and an explicit blank-template copy containing only the app version. No uploader, browser launcher, automatic diagnostics, screenshots or session-derived payloads.
 - Hash-check the embedded guide, add 19 Help/reporting assertions (430 total) and two new fictional previews (nineteen total).

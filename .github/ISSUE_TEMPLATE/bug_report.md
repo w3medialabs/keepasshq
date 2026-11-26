@@ -1,6 +1,7 @@
 ---
 name: Bug report
 about: Reproduce a problem using fictional data
+labels: "bug,needs triage"
 ---
 
 **Version / Windows / display scale**
