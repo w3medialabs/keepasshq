@@ -8,6 +8,14 @@ A portable Windows workspace for browsing and organizing KeePass databases. Expa
 
 [Source](https://github.com/w3medialabs/keepasshq) · [Releases](https://github.com/w3medialabs/keepasshq/releases) · [Issues](https://github.com/w3medialabs/keepasshq/issues) · [Private security reports](https://github.com/w3medialabs/keepasshq/security/advisories/new)
 
+## KeePass and KeePassHQ
+
+[KeePass](https://keepass.info/) is a free, open-source password manager. KeePass 2 stores login details and notes in groups inside an encrypted `.kdbx` database file that you control.
+
+Unlocking decrypts the database using its master key: usually a master password, optionally combined with a key file or Windows-account-protected factor. Every configured factor is required to open it again. Saving writes an encrypted database back to disk; no hosted password-manager account is required. See KeePass's [master-key guide](https://keepass.info/help/base/keys.html).
+
+KeePassHQ is an independent, portable Windows app for working with these databases. It embeds the pinned KeePass 2.62 library for database encryption and adds searchable card browsing, live editing, nested-group organization, drag-and-drop ordering, and save/conflict recovery. Viewer has one browser; Organizer has two for the same or separate databases, including copy/move between them. It works offline without an installed copy of KeePass and is not an official KeePass release.
+
 ![Organizer with fictional entries](docs/images/organizer.png)
 
 ## Get started
