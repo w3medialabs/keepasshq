@@ -10,6 +10,8 @@ Each BrowserPane also owns a transient search input and separate search expansio
 
 All live model changes are on the UI thread. Save/checkpoint snapshots are made before worker encryption. Explicit saves disable editing and serialize through one task. Lifecycle decisions block background interaction. Closing/locking during protection or cross-file commits is queued until data is protected or a clear failure state is shown.
 
+Help is a separate owned window with text rendered from the embedded, hash-verified `docs/HELP.md`. Its small renderer supports topic headings, paragraphs, bullets, bold and inline code; it creates no active web links or HTML engine. F1 does not use or replace the operation's existing modal veil. Help navigation/copy controls do not reset vault inactivity. Reporting is fixed text plus the app assembly version, copied only on explicit actions through the existing clipboard service. It does not inspect the working session/environment/clipboard for report content, launch URLs, authenticate to GitHub or submit anything. See [REPORTING.md](REPORTING.md).
+
 ## Model and ordering
 
 KeePass models retain the rich database. Five visible string fields are edited directly, with history backups before coalesced edits. Group/entry arrays carry native per-type order, while encrypted `VaultOrganizer.CardOrder` custom data carries mixed interleaving. Legacy identifiers remain compatible with 1.1. Before writing, ValidateTree rejects duplicate UUIDs, inconsistent parents, cycles and an invalid root.

@@ -15,6 +15,7 @@ if ((Get-FileHash -LiteralPath $KeePassPath -Algorithm SHA256).Hash -ne 'AFB89B7
 $references = @('System.dll','System.Core.dll','System.Xml.dll','System.Drawing.dll','System.Xaml.dll','System.IO.Compression.dll','System.IO.Compression.FileSystem.dll',"$framework\WPF\WindowsBase.dll","$framework\WPF\PresentationCore.dll","$framework\WPF\PresentationFramework.dll",$keePassPath)
 $arguments = @('/nologo','/target:winexe','/platform:x64','/optimize+','/checked+','/warn:4',('/out:' + (Join-Path $outputRoot 'KeePassHQ.exe')),('/resource:' + $keePassPath + ',KeePass.exe'),('/resource:' + (Join-Path $sourceRoot 'Theme.xaml') + ',Theme.xaml'),('/resource:' + (Join-Path $sourceRoot 'Brand.png') + ',Brand.png'))
 if ($Diagnostics) { $arguments += '/define:DIAGNOSTICS' }
+$arguments += '/resource:' + (Join-Path $sourceRoot '../../docs/HELP.md') + ',Help.md'
 $iconRoot = Join-Path $sourceRoot '../../assets/bootstrap-icons'
 foreach ($icon in Get-ChildItem -LiteralPath $iconRoot -Filter '*.svg') { $arguments += '/resource:' + $icon.FullName + ',Bootstrap.' + $icon.Name }
 if (Test-Path -LiteralPath (Join-Path $sourceRoot 'KeePassHQ.ico')) { $arguments += '/win32icon:' + (Join-Path $sourceRoot 'KeePassHQ.ico') }

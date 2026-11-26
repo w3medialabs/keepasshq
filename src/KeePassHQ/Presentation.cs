@@ -21,7 +21,7 @@ namespace VaultOrganizer
             { "settings", "gear" }, { "eye", "eye" }, { "eye-off", "eye-slash" },
             { "viewer", "view-list" }, { "organizer", "layout-split" }, { "recovery", "file-earmark-plus" },
             { "add", "plus-lg" }, { "copy", "copy" }, { "paste", "clipboard" },
-            { "cut", "scissors" }, { "chevron", "chevron-down" }, { "info", "info-circle" }, { "search", "search" }
+            { "cut", "scissors" }, { "chevron", "chevron-down" }, { "info", "info-circle" }, { "search", "search" }, { "help", "question-circle" }
         };
         private static readonly Dictionary<string, Geometry[]> IconGeometry = new Dictionary<string, Geometry[]>();
         internal static FrameworkElement Icon(string name, string color = null, double size = 16)

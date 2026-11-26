@@ -24,6 +24,7 @@
 - Centered one/two-pane view switch, icon-only header actions, Settings at the far right, and styled descriptive tooltips.
 - Compact colored cards with official Bootstrap folder/key icons, bordered white panels/columns, centered column captions, narrow scrollbars and full database paths under record counts. Field actions use smaller, closely spaced Bootstrap icons.
 - Styled menus/dropdowns, labeled file-picker rows, and explicit show/hide controls for opening/creation passwords. Hidden/closed/locked password inputs clear their temporary revealed text.
+- Offline Help/F1 with navigable documentation, available before unlocking and alongside active dialogs. Manual reporting copies only blank prompts/app version or fixed GitHub links; no uploader, browser launch, screenshots or automatic diagnostics.
 
 ## Two databases
 

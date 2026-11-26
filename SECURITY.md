@@ -10,6 +10,8 @@ Version 1.2 is the current development line; older prototypes are superseded. Fi
 
 Never attach a real database, master password, key file, account-protection file, recovery bundle, or screenshot of actual secrets to a public issue. Reproduce with generated fictional data and describe the affected version/steps. Regular bugs can use the public issue template.
 
+In-app Help offers manual reporting guidance and explicit copy buttons. Only the application version fills the blank template automatically; links are fixed and contain no state-derived parameters. There is no reporter upload, browser launch, screenshot/log/exception collection or GitHub authentication. Users must review and submit in their browser. A blank template cannot sanitize text added later; see [reporting privacy](docs/REPORTING.md).
+
 ## Trust boundary
 
 - Decryption and editing happen in this process on the local computer. The application contains no networking, telemetry, AI integration, account backend, update checker, plugin loader, URL launcher, or command execution feature. Building requires no network access with the bundled verified dependency.

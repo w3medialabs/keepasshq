@@ -139,7 +139,7 @@ namespace VaultOrganizer
             actions.Children.Add(Rule());
             actions.Children.Add(IconButton("close", "Close databases · choose Save or Keep draft, then return to the open screen", async () => { await CloseDatabases(); }));
             actions.Children.Add(IconButton("lock", "Lock · keep unpublished edits in an encrypted draft and release databases · Ctrl+L", async () => { await Seal(false); }));
-            actions.Children.Add(Rule()); actions.Children.Add(IconButton("settings", "Settings · checkpoint interval and inactivity lock", ShowSettings));
+            actions.Children.Add(Rule()); actions.Children.Add(IconButton("help", "Help · offline documentation and safe reporting · F1", ShowHelp)); actions.Children.Add(IconButton("settings", "Settings · checkpoint interval and inactivity lock", ShowSettings));
             Grid.SetColumn(actions, 2); header.Children.Add(actions); shell.Children.Add(header);
             workspace.ColumnDefinitions.Add(new ColumnDefinition()); workspace.ColumnDefinitions.Add(new ColumnDefinition());
             Grid.SetRow(workspace, 1); shell.Children.Add(workspace);
@@ -169,6 +169,7 @@ namespace VaultOrganizer
             unlockButton.Margin = new Thickness(0, 16, 0, 0); unlockButton.HorizontalAlignment = HorizontalAlignment.Stretch;
             unlockContent.Children.Add(unlockButton);
             unlockContent.Children.Add(Button("Create new database…", () => DatabaseDialog(null, true), "Quiet"));
+            unlockContent.Children.Add(Button("Help & documentation · F1", ShowHelp, "Quiet"));
             EnsureTooltips(shell); SetStatus();
         }
 
@@ -684,6 +685,7 @@ namespace VaultOrganizer
         private void OnKey(object sender, KeyEventArgs e)
         {
             Activity();
+            if (e.Key == Key.F1) { e.Handled = true; ShowHelp(); return; }
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0 && e.Key == Key.F && workspace.IsEnabled)
             { var pane = panes.FirstOrDefault(p => p.Layout.IsKeyboardFocusWithin && p.Layout.Visibility == Visibility.Visible) ?? panes.FirstOrDefault(p => p.Layout.Visibility == Visibility.Visible); if (pane != null) { pane.Search.Focus(); pane.Search.SelectAll(); e.Handled = true; } }
             if ((Keyboard.Modifiers & ModifierKeys.Control) != 0 && e.Key == Key.S) { e.Handled = true; if (!locked) { var unused = SaveNow(true); } }

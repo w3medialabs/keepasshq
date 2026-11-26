@@ -33,6 +33,7 @@ Use a disposable copy first. Passwords are deliberately visible while entries ar
 - Explicit saves, private encrypted draft checkpoints, save reminders, inactivity locking, safe database closing, and recovery copies.
 - SHA-256 change detection and three-way conflict review before replacing a changed database. Encrypted backups and post-replacement checks preserve late writers.
 - Password generator with length/category rules and exactly **Cancel**, **Copy**, and **Use**.
+- Locally bundled Help/F1, plus privacy-conscious manual reporting guidance and explicit blank-template/link copying.
 - KeePass 2.62 handles KDBX encryption and rich metadata. Hidden fields, history, and attachments are retained without reducing entries to the visible fields.
 
 ## Documentation
@@ -41,6 +42,8 @@ Use a disposable copy first. Passwords are deliberately visible while entries ar
 | --- | --- |
 | [Feature list](FEATURES.md) | Supported behavior and deliberate limits |
 | [User guide](docs/USER-GUIDE.md) | Navigation, editing, two databases, saving, drafts and recovery |
+| [In-app Help guide](docs/HELP.md) | Offline topics bundled into the executable |
+| [Reporting privacy](docs/REPORTING.md) | Manual GitHub reports, permitted template data and exclusions |
 | [Build and tests](docs/BUILD.md) | Offline build, diagnostics, source layout and CI |
 | [Security policy](SECURITY.md) | Threat boundaries and private reporting |
 | [Development audit](docs/AUDIT.md) | Findings, corrections, tests and remaining limits |
@@ -63,6 +66,6 @@ cd keepasshq
 powershell -NoProfile -File .\validate.ps1 -Render
 ```
 
-Builds use the bundled, hash-pinned KeePass 2.62 dependency without package restore. Validation checks source inventory, documentation links and provenance, builds release and diagnostics, checks release boundaries and dependency integrity, runs 411 synthetic assertions and two dependency-shadow startup checks, and renders seventeen fictional previews. To create a local portable deployment with a fictional demo, run `powershell -NoProfile -File .\package.ps1 -Demo` from a clean committed checkout; see [release instructions](docs/RELEASING.md). See [Contributing](CONTRIBUTING.md) before opening a [pull request](https://github.com/w3medialabs/keepasshq/pulls).
+Builds use the bundled, hash-pinned KeePass 2.62 dependency without package restore. Validation checks source inventory, documentation links and provenance, builds release and diagnostics, checks release boundaries, embedded Help and dependency integrity, runs 430 synthetic assertions and two dependency-shadow startup checks, and renders nineteen fictional previews. To create a local portable deployment with a fictional demo, run `powershell -NoProfile -File .\package.ps1 -Demo` from a clean committed checkout; see [release instructions](docs/RELEASING.md). See [Contributing](CONTRIBUTING.md) before opening a [pull request](https://github.com/w3medialabs/keepasshq/pulls).
 
 This is an independent application using KeePass technology, not an official KeePass release. The house-lock mark is from [Bootstrap Icons](https://icons.getbootstrap.com/icons/house-lock/), used under MIT. KeePassHQ and its combined distribution are GPL-2.0-or-later; see [LICENSE](LICENSE).

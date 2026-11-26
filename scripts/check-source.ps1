@@ -48,5 +48,5 @@ foreach ($line in Get-Content -LiteralPath (Join-Path $iconRoot 'SHA256SUMS.txt'
     $expectedHash = $Matches[1]; $iconName = $Matches[2]; $iconNames += $iconName
     if ((Get-FileHash -LiteralPath (Join-Path $iconRoot $iconName) -Algorithm SHA256).Hash -ne $expectedHash) { throw "Bootstrap icon hash mismatch: $iconName" }
 }
-if ($iconNames.Count -ne 19 -or (Compare-Object ($iconNames | Sort-Object -Unique) (Get-ChildItem -LiteralPath $iconRoot -Filter '*.svg' | Select-Object -ExpandProperty Name))) { throw 'Bootstrap SVG inventory differs from its nineteen pinned sources' }
+if ($iconNames.Count -ne 20 -or (Compare-Object ($iconNames | Sort-Object -Unique) (Get-ChildItem -LiteralPath $iconRoot -Filter '*.svg' | Select-Object -ExpandProperty Name))) { throw 'Bootstrap SVG inventory differs from its twenty pinned sources' }
 Write-Output 'PASS source inventory, secret/path patterns, documentation links, upstream source/icon hashes and runtime branding'

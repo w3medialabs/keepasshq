@@ -1,3 +1,31 @@
+Offline Help and manual reporting — November 25, 2026
+Starting commit: e95ffdfb57b646df58b71c00d8a64993f0ae8710
+
+PASS release/diagnostics builds; 430 synthetic assertions (19 Help additions).
+PASS twelve embedded offline topics and source/resource SHA-256 equality.
+PASS locked-screen Help, singleton F1, unchanged factors and underlying pending
+     key, choice and conflict dialogs; Escape closes only Help.
+PASS state-free report template with application version as its sole automatic
+     value; no model, factor, query, path or clipboard reads for report preparation.
+PASS distinct fixed issue/private-security links, busy-clipboard retention,
+     app-owned timeout cleanup and lock with static Help remaining open.
+PASS nineteen fictional renders; inspected Help/reporting, unlock and compact UI.
+PASS source inventory, documentation links, secret/personal-path patterns, twenty
+     original Bootstrap icon hashes, source/dependency pins, release diagnostic
+     exclusion and both neighboring-assembly startup refusal checks.
+GitHub private vulnerability reporting was verified enabled. No report submitted.
+No real vaults, factors, account-protection files, user's clipboard or native
+unlocked password-manager UI accessed. Manual text can still expose secrets;
+users must review their reports. The wrapper remains unsigned and development
+validation is not an independent security certification.
+PASS release diagnostics exclusion and embedded dependency integrity
+PASS startup refuses neighboring KeePass.exe and KeePass.dll before diagnostics or vault access
+PASS embedded offline help matches the reviewed documentation source
+Release SHA-256: 05923D2E3DEDF08004F1F93693BB48FF87FD2104AE7F1B339A5CE271642C6E7A
+Embedded KeePass SHA-256: AFB89B74AE1B8519F483D600095F4DF8D86628178AF6ACDC5F2B23888C89C3F3
+
+--- Previous search validation record (historical) ---
+
 Per-browser search — November 25, 2026
 Starting commit: 641cc6b8999d367eebcd2d517dddd0ddcbbeba9b
 

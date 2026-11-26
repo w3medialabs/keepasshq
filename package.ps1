@@ -51,7 +51,7 @@ try {
     $zip = [IO.Compression.ZipFile]::OpenRead($portable)
     try {
         $names = @($zip.Entries | ForEach-Object FullName)
-        foreach ($required in @('KeePassHQ/KeePassHQ.exe','KeePassHQ/LICENSE','KeePassHQ/THIRD-PARTY.md','KeePassHQ/TEST-RESULTS.txt','KeePassHQ/BUILD-VALIDATION.txt','KeePassHQ/third_party/Bootstrap-Icons-LICENSE.txt','KeePassHQ/third_party/KeePass/KeePass-2.62-source-mirror.zip')) {
+        foreach ($required in @('KeePassHQ/KeePassHQ.exe','KeePassHQ/LICENSE','KeePassHQ/THIRD-PARTY.md','KeePassHQ/TEST-RESULTS.txt','KeePassHQ/BUILD-VALIDATION.txt','KeePassHQ/docs/HELP.md','KeePassHQ/docs/REPORTING.md','KeePassHQ/third_party/Bootstrap-Icons-LICENSE.txt','KeePassHQ/third_party/KeePass/KeePass-2.62-source-mirror.zip')) {
             if ($required -notin $names) { throw "Portable package entry missing: $required" }
         }
         if ($Demo -and 'KeePassHQ/Demo.kdbx' -notin $names) { throw 'Fictional demo missing from portable ZIP' }

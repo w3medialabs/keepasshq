@@ -9,6 +9,7 @@ Use [issues](https://github.com/w3medialabs/keepasshq/issues/new/choose) for fic
 3. Add targeted tests for behavior with real data-loss/security consequences. Do not add implementation-mirroring tests for cosmetic changes.
 4. Include what changed, why, validation performed, and any compatibility or failure behavior in your pull request. Include synthetic renders for visible changes.
 5. Review dependency provenance and license effects before changing embedded code/resources. Keep release builds free of diagnostics and vault samples other than explicitly fictional demo material.
+6. Keep `docs/HELP.md` and the detailed user guide aligned when changing user-visible behavior. Help is embedded without a browser/HTML engine. Preserve the one-value report allowlist and [reporting privacy boundary](docs/REPORTING.md); do not add automatic logs, dumps, screenshots or session-derived URL parameters.
 
 Run `powershell -NoProfile -File .\validate.ps1 -Render` from your checkout. It creates ignored local build/test output. Review rendered PNGs under `test-output/renders` for affected screens. The [manual Windows workflow](https://github.com/w3medialabs/keepasshq/actions/workflows/build.yml) runs the same command; local evidence remains useful when hosted runners are unavailable.
 

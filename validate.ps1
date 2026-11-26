@@ -17,7 +17,7 @@ try {
     $diagnosticMetadata = [Text.Encoding]::ASCII.GetString($diagnosticBytes)
     foreach ($name in @('Tests', 'IsolatedClipboard', 'BeforeRecoveryPublish', 'AfterSaveWrite',
         'BeforeSaveReplace', 'AfterSaveReplace', 'BeforeDraftPublish', 'AfterDraftWrite', 'BeforeCreatePublish', 'RenderDemo',
-        'TestWorkflow', 'TestMultipleDatabases', 'AuditChecks', 'TestAuditWorkflow', 'TestPasswordReveal', 'TestUiCompleteness', 'SyntheticInputSource', 'IsolatedDraftRoot', 'FinalAuditChecks', 'TestFinalAuditWorkflow', 'PwDatabaseScope', 'RunUiWorkflow', 'RewriteDraftWorking', 'TestBrowserSearch')) {
+        'TestWorkflow', 'TestMultipleDatabases', 'AuditChecks', 'TestAuditWorkflow', 'TestPasswordReveal', 'TestUiCompleteness', 'SyntheticInputSource', 'IsolatedDraftRoot', 'FinalAuditChecks', 'TestFinalAuditWorkflow', 'PwDatabaseScope', 'RunUiWorkflow', 'RewriteDraftWorking', 'TestBrowserSearch', 'HelpClipboardProbe', 'TestOfflineHelp', 'HelpKey', 'HelpButton')) {
         $token = $name + [char]0
         if ($releaseMetadata.Contains($token) -or !$diagnosticMetadata.Contains($token)) {
             throw "Release/diagnostics metadata boundary failed: $name"
@@ -30,6 +30,12 @@ try {
         }
     }
     $assembly = [Reflection.Assembly]::Load($releaseBytes)
+    $helpResource = $assembly.GetManifestResourceStream('Help.md')
+    if (!$helpResource) { throw 'Embedded offline help missing' }
+    $helpDigest = [Security.Cryptography.SHA256]::Create()
+    try { $helpHash = [BitConverter]::ToString($helpDigest.ComputeHash($helpResource)).Replace('-', '') }
+    finally { $helpResource.Dispose(); $helpDigest.Dispose() }
+    if ($helpHash -ne (Get-FileHash .\docs\HELP.md -Algorithm SHA256).Hash) { throw 'Embedded Help differs from its reviewed source' }
     $resource = $assembly.GetManifestResourceStream('KeePass.exe')
     if (!$resource) { throw 'Embedded KeePass resource missing' }
     $sha = [Security.Cryptography.SHA256]::Create()
@@ -56,7 +62,7 @@ try {
     if ($Render) {
         $renderRoot = Join-Path $results 'renders'
         New-Item -ItemType Directory -Path $renderRoot -Force | Out-Null
-        foreach ($mode in @('viewer', 'organizer', 'generator', 'gap', 'unlock', 'create', 'dual', 'recovery', 'reminder', 'open', 'settings', 'toast', 'compact', 'tooltip', 'dropdown', 'conflict', 'search')) {
+        foreach ($mode in @('viewer', 'organizer', 'generator', 'gap', 'unlock', 'create', 'dual', 'recovery', 'reminder', 'open', 'settings', 'toast', 'compact', 'tooltip', 'dropdown', 'conflict', 'search', 'help', 'reporting')) {
             $image = Join-Path $renderRoot ($mode + '.png')
             $process = Start-Process -FilePath $diagnosticsPath -ArgumentList @('--render-demo', ('"' + $image + '"'), $mode) -WindowStyle Hidden -Wait -PassThru
             if ($process.ExitCode -ne 0 -or !(Test-Path -LiteralPath $image)) { throw "Synthetic render failed: $mode" }
@@ -64,6 +70,7 @@ try {
     }
     @('PASS release diagnostics exclusion and embedded dependency integrity',
         'PASS startup refuses neighboring KeePass.exe and KeePass.dll before diagnostics or vault access',
+        'PASS embedded offline help matches the reviewed documentation source',
         ('Release SHA-256: ' + (Get-FileHash $releasePath -Algorithm SHA256).Hash),
         ('Embedded KeePass SHA-256: ' + $embeddedHash)) | Set-Content (Join-Path $results 'validation.txt')
     Get-Content (Join-Path $results 'validation.txt')

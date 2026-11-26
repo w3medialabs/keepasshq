@@ -1,5 +1,13 @@
 # User guide
 
+## Help and reporting
+
+Choose the **?** Help icon immediately left of Settings, use **F1**, or choose **Help & documentation** on the open screen. The locally bundled guide works offline and without unlocking. It opens in a separate window so an existing unlock, recovery or conflict dialog remains intact; Escape in Help closes only Help. Reading or navigating Help does not keep a vault unlocked beyond its inactivity setting.
+
+In **Report a problem**, copy blank prompts/app version or a fixed public issue/private security link. Paste the link into your browser and submit only after reviewing your own fictional reproduction. The app sends nothing and does not collect logs, exceptions, screenshots, paths or database/key/query content for the report. Public issues and private vulnerability reports both require care: never include real vaults or factors. See [reporting privacy](REPORTING.md).
+
+Preview the [offline Help window](images/help.png) and [manual reporting controls](images/reporting.png). The same [Help text](HELP.md) is embedded into the executable.
+
 ## Open or create
 
 Obtain the portable archive from [GitHub Releases](https://github.com/w3medialabs/keepasshq/releases), when available, or [build the source](BUILD.md). Extract the release to a folder you can write to and run KeePassHQ.exe. Browse to a `.kdbx`, enter the master password and any key factors required by that database, then unlock. To use a key-file-only database, clear **Use master password** and select the key file. Windows account protection requires the correct Windows account and its intact protected key material. Plugin key providers/ciphers are unsupported.

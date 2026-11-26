@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add offline Help/F1 with twelve navigable topics, a toolbar icon and open-screen access. Help preserves pending key/recovery/conflict dialogs and allows inactivity locking to continue.
+- Add manual reporting guidance with fixed public/private GitHub links and an explicit blank-template copy containing only the app version. No uploader, browser launcher, automatic diagnostics, screenshots or session-derived payloads.
+- Hash-check the embedded guide, add 19 Help/reporting assertions (430 total) and two new fictional previews (nineteen total).
 - Add an independent styled search bar to each browser, with match counts, literal all-word matching across names/usernames/URLs/notes/group paths, editable results, folder links, Ctrl+F and clear/Escape navigation restoration. Respect search-disabled groups and recycle-bin exclusions; keep queries transient and clear them on lock/close.
 - Add 26 search regressions (411 total assertions) and a seventeenth fictional preview. Bundle the pinned Bootstrap search SVG with its source/hash and MIT attribution.
 - Final adversarial review against KeePass/Microsoft guidance: require whole username/password/URL bundle review for concurrent credential edits; preserve independent notes and Keep-both versions.

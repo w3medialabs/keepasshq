@@ -124,7 +124,7 @@ namespace VaultOrganizer
             rendering = true; heartbeat.Stop(); clipboard = new IsolatedClipboard();
             int width = mode == "compact" ? 980 : 1280, height = mode == "compact" ? 640 : 820; Width = width; Height = height;
             VaultSession.IsolatedDraftRoot = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "render-drafts-" + Guid.NewGuid().ToString("N"));
-            if (mode != "unlock" && mode != "create")
+            if (mode != "unlock" && mode != "create" && mode != "help" && mode != "reporting")
             {
                 string dir = System.IO.Path.Combine(AppDomain.CurrentDomain.BaseDirectory,"render-"+Guid.NewGuid().ToString("N")); Directory.CreateDirectory(dir);
                 string path = Tests.CreateFixture(dir,false); LoadSynthetic(path,System.IO.Path.Combine(dir,"drafts"));
@@ -160,7 +160,13 @@ namespace VaultOrganizer
                 }
             }
             if(mode=="create")DatabaseDialog(null,true);
-            var content=(FrameworkElement)Content;content.Width=width;content.Height=height;content.Measure(new Size(width,height));content.Arrange(new Rect(0,0,width,height));content.UpdateLayout();
+            var content=(FrameworkElement)Content;
+            if(mode=="help"||mode=="reporting")
+            {
+                ShowHelp();if(mode=="reporting")selectHelpTopic(helpTopics.FindIndex(topic=>topic.Title=="Report a problem"));
+                content=(FrameworkElement)helpWindow.Content;width=940;height=700;
+            }
+            content.Width=width;content.Height=height;content.Measure(new Size(width,height));content.Arrange(new Rect(0,0,width,height));content.UpdateLayout();
             var bitmap=new RenderTargetBitmap(width,height,96,96,PixelFormats.Pbgra32);bitmap.Render(content);
             if(mode=="dropdown")
             {
@@ -179,6 +185,7 @@ namespace VaultOrganizer
                 var overlay=new DrawingVisual();using(var drawing=overlay.RenderOpen())drawing.DrawImage(tipBitmap,new Rect(width-tipWidth-100,70,tipWidth,tipHeight));bitmap.Render(overlay);
             }
             using(var stream=new FileStream(destination,FileMode.Create)){var encoder=new PngBitmapEncoder();encoder.Frames.Add(BitmapFrame.Create(bitmap));encoder.Save(stream);}
+            if(helpWindow!=null)helpWindow.Close();
             foreach(var working in LoadedSessions)working.Dispose();session=otherSession=null;StopTimers();SystemEvents.SessionSwitch-=OnSystemSession;
         }
     }
